@@ -1,5 +1,7 @@
 from unittest.mock import Mock
 
+import pytest
+
 from boj_stat_search.api import (
     get_data_code,
     get_data_code_raw,
@@ -349,6 +351,53 @@ def test_get_data_code_with_optional_params_uses_client_and_returns_parsed_respo
     )
 
 
+def test_get_data_code_warns_and_returns_parsed_response_on_invalid_params():
+    db = "FM01"
+    code = "STRDCLUCON"
+    start_position = 0
+    expected_url = (
+        "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=STRDCLUCON&startPosition=0"
+    )
+    raw_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T15:58:56.071+09:00",
+        "PARAMETER": {},
+        "NEXTPOSITION": None,
+        "RESULTSET": [],
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = raw_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    with pytest.warns(UserWarning, match="Invalid parameters"):
+        result = get_data_code(
+            db=db,
+            code=code,
+            start_position=start_position,
+            on_validation_error="warn",
+            client=client,
+        )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == DataResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T15:58:56.071+09:00",
+        parameter={},
+        next_position=None,
+        result_set=(),
+    )
+
+
 def test_get_data_layer_raw_uses_client_and_returns_json():
     db = "MD10"
     frequency = "Q"
@@ -614,4 +663,51 @@ def test_get_data_layer_with_optional_params_uses_client_and_returns_parsed_resp
                 "VALUES": {"SURVEY_DATES": [], "VALUES": []},
             },
         ),
+    )
+
+
+def test_get_data_layer_warns_and_returns_parsed_response_on_invalid_params():
+    db = "MD10"
+    frequency = "X"
+    layer = "*"
+    expected_url = (
+        "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=MD10&frequency=X&layer=*"
+    )
+    raw_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T16:42:00.000+09:00",
+        "PARAMETER": {},
+        "NEXTPOSITION": None,
+        "RESULTSET": [],
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = raw_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    with pytest.warns(UserWarning, match="Invalid parameters"):
+        result = get_data_layer(
+            db=db,
+            frequency=frequency,
+            layer=layer,
+            on_validation_error="warn",
+            client=client,
+        )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == DataResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T16:42:00.000+09:00",
+        parameter={},
+        next_position=None,
+        result_set=(),
     )

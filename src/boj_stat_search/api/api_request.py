@@ -7,6 +7,7 @@ from boj_stat_search.core.parser import (
     parse_metadata_response,
 )
 from boj_stat_search.core.url_builder import (
+    ErrorMode,
     build_data_code_api_url,
     build_data_layer_api_url,
     build_metadata_api_url,
@@ -41,6 +42,7 @@ def get_data_code_raw(
     start_date: str | None = None,
     end_date: str | None = None,
     start_position: int | None = None,
+    on_validation_error: ErrorMode = "raise",
     *,
     client: httpx.Client | None = None,
 ) -> dict[str, Any]:
@@ -50,6 +52,7 @@ def get_data_code_raw(
         start_date=start_date,
         end_date=end_date,
         start_position=start_position,
+        on_validation_error=on_validation_error,
     )
     return _get_json(url, client=client)
 
@@ -60,6 +63,7 @@ def get_data_code(
     start_date: str | None = None,
     end_date: str | None = None,
     start_position: int | None = None,
+    on_validation_error: ErrorMode = "raise",
     *,
     client: httpx.Client | None = None,
 ) -> DataResponse:
@@ -69,6 +73,7 @@ def get_data_code(
         start_date=start_date,
         end_date=end_date,
         start_position=start_position,
+        on_validation_error=on_validation_error,
         client=client,
     )
     return parse_data_code_response(raw)
@@ -81,6 +86,7 @@ def get_data_layer_raw(
     start_date: str | None = None,
     end_date: str | None = None,
     start_position: int | None = None,
+    on_validation_error: ErrorMode = "raise",
     *,
     client: httpx.Client | None = None,
 ) -> dict[str, Any]:
@@ -91,6 +97,7 @@ def get_data_layer_raw(
         start_date=start_date,
         end_date=end_date,
         start_position=start_position,
+        on_validation_error=on_validation_error,
     )
     return _get_json(url, client=client)
 
@@ -102,6 +109,7 @@ def get_data_layer(
     start_date: str | None = None,
     end_date: str | None = None,
     start_position: int | None = None,
+    on_validation_error: ErrorMode = "raise",
     *,
     client: httpx.Client | None = None,
 ) -> DataResponse:
@@ -112,6 +120,7 @@ def get_data_layer(
         start_date=start_date,
         end_date=end_date,
         start_position=start_position,
+        on_validation_error=on_validation_error,
         client=client,
     )
     return parse_data_code_response(raw)
