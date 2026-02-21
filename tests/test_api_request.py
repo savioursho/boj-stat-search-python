@@ -114,6 +114,70 @@ def test_get_metadata_uses_client_and_returns_parsed_response():
     )
 
 
+def test_get_metadata_raw_warns_and_returns_json_on_invalid_db():
+    db = "UNKNOWN"
+    expected_url = "https://www.stat-search.boj.or.jp/api/v1/getMetadata?db=UNKNOWN"
+    expected_payload = {"status": "ok", "items": [{"code": "foo"}]}
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    with pytest.warns(UserWarning, match="Invalid parameters"):
+        result = get_metadata_raw(
+            db=db,
+            on_validation_error="warn",
+            client=client,
+        )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
+def test_get_metadata_warns_and_returns_parsed_response_on_invalid_db():
+    db = "UNKNOWN"
+    expected_url = "https://www.stat-search.boj.or.jp/api/v1/getMetadata?db=UNKNOWN"
+    raw_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T05:00:12.008+09:00",
+        "DB": db,
+        "RESULTSET": [],
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = raw_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    with pytest.warns(UserWarning, match="Invalid parameters"):
+        result = get_metadata(
+            db=db,
+            on_validation_error="warn",
+            client=client,
+        )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == MetadataResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T05:00:12.008+09:00",
+        db=db,
+        result_set=(),
+    )
+
+
 def test_get_data_code_raw_uses_client_and_returns_json():
     db = "FM01"
     code = "STRDCLUCON,STRACLUCON"

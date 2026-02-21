@@ -5,6 +5,7 @@ from urllib.parse import SplitResult, urlencode, urlunsplit
 from boj_stat_search.core.validator import (
     validate_data_code_params,
     validate_data_layer_params,
+    validate_metadata_params,
 )
 
 ErrorMode = Literal["raise", "warn", "ignore"]
@@ -40,7 +41,13 @@ def _handle_validation_errors(
         warnings.warn(message, UserWarning, stacklevel=2)
 
 
-def build_metadata_api_url(db: str) -> str:
+def build_metadata_api_url(
+    db: str,
+    on_validation_error: ErrorMode = "raise",
+) -> str:
+    validation_errors = validate_metadata_params(db=db)
+    _handle_validation_errors(validation_errors, on_validation_error)
+
     query = urlencode({"db": db})
 
     split_result = SplitResult(

@@ -1,6 +1,7 @@
 from boj_stat_search.core.validator import (
     validate_data_code_params,
     validate_data_layer_params,
+    validate_metadata_params,
 )
 
 
@@ -174,5 +175,17 @@ def test_validate_data_layer_params_rejects_unknown_db():
         frequency="M",
         layer="*",
     )
+
+    assert _has_error(errors, "list_db()")
+
+
+def test_validate_metadata_params_accepts_known_db():
+    errors = validate_metadata_params(db="FM01")
+
+    assert errors == []
+
+
+def test_validate_metadata_params_rejects_unknown_db():
+    errors = validate_metadata_params(db="UNKNOWN")
 
     assert _has_error(errors, "list_db()")

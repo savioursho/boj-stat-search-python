@@ -15,6 +15,38 @@ def test_build_metadata_api_url_returns_expected_url():
     assert result == "https://www.stat-search.boj.or.jp/api/v1/getMetadata?db=IR01"
 
 
+def test_build_metadata_api_url_raises_on_unknown_db():
+    with pytest.raises(ValueError, match="list_db\\(\\)"):
+        build_metadata_api_url(db="UNKNOWN")
+
+
+def test_build_metadata_api_url_warns_and_returns_url_on_invalid_params():
+    with pytest.warns(UserWarning, match="Invalid parameters"):
+        result = build_metadata_api_url(
+            db="UNKNOWN",
+            on_validation_error="warn",
+        )
+
+    assert result == "https://www.stat-search.boj.or.jp/api/v1/getMetadata?db=UNKNOWN"
+
+
+def test_build_metadata_api_url_ignores_invalid_params_and_returns_url():
+    result = build_metadata_api_url(
+        db="UNKNOWN",
+        on_validation_error="ignore",
+    )
+
+    assert result == "https://www.stat-search.boj.or.jp/api/v1/getMetadata?db=UNKNOWN"
+
+
+def test_build_metadata_api_url_raises_on_invalid_on_validation_error_mode():
+    with pytest.raises(ValueError, match="on_validation_error"):
+        build_metadata_api_url(
+            db="IR01",
+            on_validation_error="invalid",
+        )
+
+
 def test_build_data_code_api_url_returns_expected_url_for_single_code():
     result = build_data_code_api_url(db="FM01", code="STRDCLUCON")
 

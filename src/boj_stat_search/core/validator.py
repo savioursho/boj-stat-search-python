@@ -169,6 +169,14 @@ def validate_data_code_params(
     return errors
 
 
+def validate_metadata_params(
+    db: str,
+) -> list[str]:
+    errors: list[str] = []
+    errors.extend(_validate_db_name(db))
+    return errors
+
+
 def validate_data_layer_params(
     db: str,
     frequency: str,

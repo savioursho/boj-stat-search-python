@@ -26,13 +26,30 @@ def _get_json(url: str, *, client: httpx.Client | None = None) -> dict[str, Any]
         return response.json()
 
 
-def get_metadata_raw(db: str, *, client: httpx.Client | None = None) -> dict[str, Any]:
-    url = build_metadata_api_url(db)
+def get_metadata_raw(
+    db: str,
+    on_validation_error: ErrorMode = "raise",
+    *,
+    client: httpx.Client | None = None,
+) -> dict[str, Any]:
+    url = build_metadata_api_url(
+        db=db,
+        on_validation_error=on_validation_error,
+    )
     return _get_json(url, client=client)
 
 
-def get_metadata(db: str, *, client: httpx.Client | None = None) -> MetadataResponse:
-    raw = get_metadata_raw(db, client=client)
+def get_metadata(
+    db: str,
+    on_validation_error: ErrorMode = "raise",
+    *,
+    client: httpx.Client | None = None,
+) -> MetadataResponse:
+    raw = get_metadata_raw(
+        db=db,
+        on_validation_error=on_validation_error,
+        client=client,
+    )
     return parse_metadata_response(raw)
 
 

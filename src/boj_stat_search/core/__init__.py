@@ -11,6 +11,7 @@ from boj_stat_search.core.url_builder import (
 from boj_stat_search.core.validator import (
     validate_data_code_params,
     validate_data_layer_params,
+    validate_metadata_params,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "build_metadata_api_url",
     "validate_data_code_params",
     "validate_data_layer_params",
+    "validate_metadata_params",
 ]
