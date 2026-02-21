@@ -20,3 +20,4 @@ def get_metadata_raw(db: str, *, client: httpx.Client | None = None) -> dict:
 def get_metadata(db: str, *, client: httpx.Client | None = None) -> MetadataResponse:
     raw = get_metadata_raw(db, client=client)
     return parse_metadata_response(raw)
+
