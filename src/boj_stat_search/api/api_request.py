@@ -6,7 +6,7 @@ from boj_stat_search.core.parser import (
     parse_data_code_response,
     parse_metadata_response,
 )
-from boj_stat_search.core.types import ErrorMode, Frequency, Layer
+from boj_stat_search.core.types import ErrorMode, Frequency, Layer, Period
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -128,8 +128,8 @@ def get_metadata(
 def get_data_code_raw(
     db: str,
     code: str,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: Period | str | None = None,
+    end_date: Period | str | None = None,
     start_position: int | None = None,
     on_validation_error: ErrorMode = "raise",
     *,
@@ -149,8 +149,8 @@ def get_data_code_raw(
 def get_data_code(
     db: str,
     code: str,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: Period | str | None = None,
+    end_date: Period | str | None = None,
     start_position: int | None = None,
     on_validation_error: ErrorMode = "raise",
     *,
@@ -172,8 +172,8 @@ def get_data_layer_raw(
     db: str,
     frequency: Frequency | str,
     layer: Layer | str,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: Period | str | None = None,
+    end_date: Period | str | None = None,
     start_position: int | None = None,
     on_validation_error: ErrorMode = "raise",
     *,
@@ -195,8 +195,8 @@ def get_data_layer(
     db: str,
     frequency: Frequency | str,
     layer: Layer | str,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: Period | str | None = None,
+    end_date: Period | str | None = None,
     start_position: int | None = None,
     on_validation_error: ErrorMode = "raise",
     *,

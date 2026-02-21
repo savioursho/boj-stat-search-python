@@ -1,9 +1,10 @@
 import pytest
 
-from boj_stat_search.core.types import Frequency, Layer
+from boj_stat_search.core.types import Frequency, Layer, Period
 from boj_stat_search.core.validator import (
     coerce_frequency,
     coerce_layer,
+    coerce_period,
     validate_data_code_params,
     validate_data_layer_params,
     validate_metadata_params,
@@ -192,6 +193,25 @@ def test_coerce_layer_from_layer_returns_api_code():
     assert coerce_layer(Layer(1, 1, 1)) == "1,1,1"
 
 
+def test_coerce_period_from_period_returns_api_code():
+    assert coerce_period(Period.month(2025, 4)) == "202504"
+
+
+def test_coerce_period_with_frequency_falls_back_to_raw_value():
+    assert coerce_period(Period.year(2025), frequency="Q") == "2025"
+
+
+def test_validate_data_code_params_accepts_period_instances():
+    errors = validate_data_code_params(
+        db="FM01",
+        code="STRDCLUCON",
+        start_date=Period.month(2025, 1),
+        end_date=Period.month(2025, 12),
+    )
+
+    assert errors == []
+
+
 def test_validate_data_layer_params_accepts_frequency_enum():
     errors = validate_data_layer_params(
         db="MD10",
@@ -226,6 +246,29 @@ def test_validate_data_layer_params_accepts_layer_class():
     )
 
     assert errors == []
+
+
+def test_validate_data_layer_params_accepts_period_instances():
+    errors = validate_data_layer_params(
+        db="BP01",
+        frequency="M",
+        layer=Layer(1, 1, 1),
+        start_date=Period.month(2025, 4),
+        end_date=Period.month(2025, 9),
+    )
+
+    assert errors == []
+
+
+def test_validate_data_layer_params_rejects_daily_yyyymmdd_string():
+    errors = validate_data_layer_params(
+        db="MD10",
+        frequency="D",
+        layer="*",
+        start_date="20250131",
+    )
+
+    assert _has_error(errors, "expected YYYYMM for frequency D")
 
 
 def test_layer_rejects_empty_levels():

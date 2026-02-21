@@ -1,7 +1,7 @@
 from typing import Any
 
 from boj_stat_search.core.database import list_db
-from boj_stat_search.core.types import Frequency, Layer
+from boj_stat_search.core.types import Frequency, Layer, Period
 
 
 FORBIDDEN_CHARS = ("<", ">", '"', "”", "!", "|", "\\", ";", "'")
@@ -21,6 +21,21 @@ def coerce_layer(layer: Any) -> Any:
     if isinstance(layer, Layer):
         return layer.to_api_value()
     return layer
+
+
+def coerce_period(
+    period: Any,
+    *,
+    frequency: Frequency | str | None = None,
+) -> Any:
+    if isinstance(period, Period):
+        if frequency is not None:
+            try:
+                return period.to_api_value(frequency)
+            except ValueError:
+                return period.to_api_value()
+        return period.to_api_value()
+    return period
 
 
 def _check_common_text(
@@ -135,10 +150,13 @@ def _validate_date_for_frequency(
 def validate_data_code_params(
     db: str,
     code: str,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: Period | str | None = None,
+    end_date: Period | str | None = None,
     start_position: int | None = None,
 ) -> list[str]:
+    normalized_start_date: Any = coerce_period(start_date)
+    normalized_end_date: Any = coerce_period(end_date)
+
     errors: list[str] = []
     errors.extend(_validate_db_name(db))
     errors.extend(_check_common_text("code", code, required=True))
@@ -151,34 +169,34 @@ def validate_data_code_params(
         if len(code_parts) > 250:
             errors.append("code: supports at most 250 series codes per request")
 
-    start_date_valid = start_date is None
-    end_date_valid = end_date is None
-    if start_date is not None:
+    start_date_valid = normalized_start_date is None
+    end_date_valid = normalized_end_date is None
+    if normalized_start_date is not None:
         start_date_errors, start_date_valid = _validate_date_for_data_code(
             "start_date",
-            start_date,
+            normalized_start_date,
         )
         errors.extend(start_date_errors)
-    if end_date is not None:
+    if normalized_end_date is not None:
         end_date_errors, end_date_valid = _validate_date_for_data_code(
             "end_date",
-            end_date,
+            normalized_end_date,
         )
         errors.extend(end_date_errors)
 
     if (
-        start_date is not None
-        and end_date is not None
+        normalized_start_date is not None
+        and normalized_end_date is not None
         and start_date_valid
         and end_date_valid
-        and isinstance(start_date, str)
-        and isinstance(end_date, str)
+        and isinstance(normalized_start_date, str)
+        and isinstance(normalized_end_date, str)
     ):
-        if len(start_date) != len(end_date):
+        if len(normalized_start_date) != len(normalized_end_date):
             errors.append(
                 "start_date/end_date: must use the same date granularity (both YYYY or both YYYYMM)"
             )
-        elif start_date > end_date:
+        elif normalized_start_date > normalized_end_date:
             errors.append("start_date/end_date: start_date must be <= end_date")
 
     return errors
@@ -196,12 +214,20 @@ def validate_data_layer_params(
     db: str,
     frequency: Frequency | str,
     layer: Layer | str,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: Period | str | None = None,
+    end_date: Period | str | None = None,
     start_position: int | None = None,
 ) -> list[str]:
     normalized_frequency = coerce_frequency(frequency)
     normalized_layer = coerce_layer(layer)
+    normalized_start_date = coerce_period(
+        start_date,
+        frequency=normalized_frequency,
+    )
+    normalized_end_date = coerce_period(
+        end_date,
+        frequency=normalized_frequency,
+    )
 
     errors: list[str] = []
     errors.extend(_validate_db_name(db))
@@ -229,32 +255,32 @@ def validate_data_layer_params(
                 errors.append("layer: each layer must be '*' or digits only")
                 break
 
-    start_date_valid = start_date is None
-    end_date_valid = end_date is None
-    if start_date is not None:
+    start_date_valid = normalized_start_date is None
+    end_date_valid = normalized_end_date is None
+    if normalized_start_date is not None:
         start_date_errors, start_date_valid = _validate_date_for_frequency(
             "start_date",
-            start_date,
+            normalized_start_date,
             str(normalized_frequency),
         )
         errors.extend(start_date_errors)
-    if end_date is not None:
+    if normalized_end_date is not None:
         end_date_errors, end_date_valid = _validate_date_for_frequency(
             "end_date",
-            end_date,
+            normalized_end_date,
             str(normalized_frequency),
         )
         errors.extend(end_date_errors)
 
     if (
-        start_date is not None
-        and end_date is not None
+        normalized_start_date is not None
+        and normalized_end_date is not None
         and frequency_valid
         and start_date_valid
         and end_date_valid
-        and isinstance(start_date, str)
-        and isinstance(end_date, str)
-        and start_date > end_date
+        and isinstance(normalized_start_date, str)
+        and isinstance(normalized_end_date, str)
+        and normalized_start_date > normalized_end_date
     ):
         errors.append("start_date/end_date: start_date must be <= end_date")
 

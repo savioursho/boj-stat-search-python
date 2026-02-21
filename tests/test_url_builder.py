@@ -2,7 +2,7 @@ from typing import cast
 
 import pytest
 
-from boj_stat_search.core.types import ErrorMode, Frequency, Layer
+from boj_stat_search.core.types import ErrorMode, Frequency, Layer, Period
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -96,6 +96,20 @@ def test_build_data_code_api_url_returns_expected_url_with_partial_optional_para
     )
 
 
+def test_build_data_code_api_url_accepts_period_instances():
+    result = build_data_code_api_url(
+        db="CO",
+        code="TK99F1000601GCQ01000,TK99F2000601GCQ01000",
+        start_date=Period.quarter(2024, 1),
+        end_date=Period.quarter(2025, 4),
+    )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=CO&code=TK99F1000601GCQ01000,TK99F2000601GCQ01000&startDate=202401&endDate=202504"
+    )
+
+
 def test_build_data_layer_api_url_returns_expected_url_for_wildcard_layer():
     result = build_data_layer_api_url(db="MD10", frequency="Q", layer="*")
 
@@ -118,6 +132,21 @@ def test_build_data_layer_api_url_returns_expected_url_with_optional_params():
     assert (
         result
         == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=BP01&frequency=M&layer=1,1,1&startDate=202504&endDate=202509&startPosition=255"
+    )
+
+
+def test_build_data_layer_api_url_accepts_period_instances():
+    result = build_data_layer_api_url(
+        db="BP01",
+        frequency="M",
+        layer=Layer(1, 1, 1),
+        start_date=Period.month(2025, 4),
+        end_date=Period.month(2025, 9),
+    )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=BP01&frequency=M&layer=1,1,1&startDate=202504&endDate=202509"
     )
 
 
@@ -210,6 +239,16 @@ def test_build_data_layer_api_url_raises_on_invalid_frequency():
 def test_build_data_layer_api_url_raises_on_invalid_layer():
     with pytest.raises(ValueError, match="layer"):
         build_data_layer_api_url(db="MD10", frequency="Q", layer="1,a")
+
+
+def test_build_data_layer_api_url_raises_on_invalid_date_granularity_for_frequency():
+    with pytest.raises(ValueError, match="start_date"):
+        build_data_layer_api_url(
+            db="BP01",
+            frequency="Q",
+            layer="1,1,1",
+            start_date=Period.year(2025),
+        )
 
 
 def test_build_data_code_api_url_raises_on_unknown_db():

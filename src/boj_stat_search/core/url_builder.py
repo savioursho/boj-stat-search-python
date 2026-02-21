@@ -2,10 +2,11 @@ from typing import Any
 import warnings
 from urllib.parse import SplitResult, urlencode, urlunsplit
 
-from boj_stat_search.core.types import ErrorMode, Frequency, Layer
+from boj_stat_search.core.types import ErrorMode, Frequency, Layer, Period
 from boj_stat_search.core.validator import (
     coerce_frequency,
     coerce_layer,
+    coerce_period,
     validate_data_code_params,
     validate_data_layer_params,
     validate_metadata_params,
@@ -65,25 +66,28 @@ def build_metadata_api_url(
 def build_data_code_api_url(
     db: str,
     code: str,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: Period | str | None = None,
+    end_date: Period | str | None = None,
     start_position: int | None = None,
     on_validation_error: ErrorMode = "raise",
 ) -> str:
+    normalized_start_date: Any = coerce_period(start_date)
+    normalized_end_date: Any = coerce_period(end_date)
+
     validation_errors = validate_data_code_params(
         db=db,
         code=code,
-        start_date=start_date,
-        end_date=end_date,
+        start_date=normalized_start_date,
+        end_date=normalized_end_date,
         start_position=start_position,
     )
     _handle_validation_errors(validation_errors, on_validation_error)
 
     query_params: dict[str, str | int] = {"db": db, "code": code}
-    if start_date is not None:
-        query_params["startDate"] = start_date
-    if end_date is not None:
-        query_params["endDate"] = end_date
+    if normalized_start_date is not None:
+        query_params["startDate"] = normalized_start_date
+    if normalized_end_date is not None:
+        query_params["endDate"] = normalized_end_date
     if start_position is not None:
         query_params["startPosition"] = start_position
 
@@ -103,20 +107,28 @@ def build_data_layer_api_url(
     db: str,
     frequency: Frequency | str,
     layer: Layer | str,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: Period | str | None = None,
+    end_date: Period | str | None = None,
     start_position: int | None = None,
     on_validation_error: ErrorMode = "raise",
 ) -> str:
     normalized_frequency: Any = coerce_frequency(frequency)
     normalized_layer: Any = coerce_layer(layer)
+    normalized_start_date: Any = coerce_period(
+        start_date,
+        frequency=normalized_frequency,
+    )
+    normalized_end_date: Any = coerce_period(
+        end_date,
+        frequency=normalized_frequency,
+    )
 
     validation_errors = validate_data_layer_params(
         db=db,
         frequency=normalized_frequency,
         layer=normalized_layer,
-        start_date=start_date,
-        end_date=end_date,
+        start_date=normalized_start_date,
+        end_date=normalized_end_date,
         start_position=start_position,
     )
     _handle_validation_errors(validation_errors, on_validation_error)
@@ -126,10 +138,10 @@ def build_data_layer_api_url(
         "frequency": normalized_frequency,
         "layer": normalized_layer,
     }
-    if start_date is not None:
-        query_params["startDate"] = start_date
-    if end_date is not None:
-        query_params["endDate"] = end_date
+    if normalized_start_date is not None:
+        query_params["startDate"] = normalized_start_date
+    if normalized_end_date is not None:
+        query_params["endDate"] = normalized_end_date
     if start_position is not None:
         query_params["startPosition"] = start_position
 
