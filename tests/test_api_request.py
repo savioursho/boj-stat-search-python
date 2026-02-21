@@ -12,7 +12,7 @@ from boj_stat_search.api import (
     get_metadata,
     get_metadata_raw,
 )
-from boj_stat_search.core.types import Frequency
+from boj_stat_search.core.types import Frequency, Layer
 from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
@@ -555,6 +555,42 @@ def test_get_data_layer_raw_normalizes_lowercase_frequency():
     result = get_data_layer_raw(
         db=db,
         frequency="q",
+        layer=layer,
+        client=client,
+    )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
+def test_get_data_layer_raw_accepts_layer_class():
+    db = "BP01"
+    frequency = "M"
+    layer = Layer(1, 1, 1)
+    expected_url = build_data_layer_api_url(
+        db=db,
+        frequency=frequency,
+        layer=layer,
+    )
+    expected_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T16:42:00.000+09:00",
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_layer_raw(
+        db=db,
+        frequency=frequency,
         layer=layer,
         client=client,
     )

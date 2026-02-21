@@ -1,6 +1,9 @@
-from boj_stat_search.core.types import Frequency
+import pytest
+
+from boj_stat_search.core.types import Frequency, Layer
 from boj_stat_search.core.validator import (
     coerce_frequency,
+    coerce_layer,
     validate_data_code_params,
     validate_data_layer_params,
     validate_metadata_params,
@@ -185,6 +188,10 @@ def test_coerce_frequency_from_enum_returns_api_code():
     assert coerce_frequency(Frequency.QUARTERLY) == "Q"
 
 
+def test_coerce_layer_from_layer_returns_api_code():
+    assert coerce_layer(Layer(1, 1, 1)) == "1,1,1"
+
+
 def test_validate_data_layer_params_accepts_frequency_enum():
     errors = validate_data_layer_params(
         db="MD10",
@@ -207,6 +214,38 @@ def test_validate_data_layer_params_normalizes_lowercase_frequency():
     )
 
     assert errors == []
+
+
+def test_validate_data_layer_params_accepts_layer_class():
+    errors = validate_data_layer_params(
+        db="BP01",
+        frequency="Q",
+        layer=Layer(1, "*", 3),
+        start_date="202401",
+        end_date="202404",
+    )
+
+    assert errors == []
+
+
+def test_layer_rejects_empty_levels():
+    with pytest.raises(ValueError, match="between 1 and 5"):
+        Layer()
+
+
+def test_layer_rejects_too_many_levels():
+    with pytest.raises(ValueError, match="between 1 and 5"):
+        Layer(1, 2, 3, 4, 5, 6)
+
+
+def test_layer_rejects_numeric_string_level():
+    with pytest.raises(ValueError, match="int or '\\*'"):
+        Layer("1")
+
+
+def test_layer_rejects_negative_int_level():
+    with pytest.raises(ValueError, match=">= 0"):
+        Layer(-1)
 
 
 def test_validate_metadata_params_accepts_known_db():

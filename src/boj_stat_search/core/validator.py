@@ -1,7 +1,7 @@
 from typing import Any
 
 from boj_stat_search.core.database import list_db
-from boj_stat_search.core.types import Frequency
+from boj_stat_search.core.types import Frequency, Layer
 
 
 FORBIDDEN_CHARS = ("<", ">", '"', "”", "!", "|", "\\", ";", "'")
@@ -15,6 +15,12 @@ def coerce_frequency(frequency: Any) -> Any:
     if isinstance(frequency, str):
         return frequency.strip().upper()
     return frequency
+
+
+def coerce_layer(layer: Any) -> Any:
+    if isinstance(layer, Layer):
+        return layer.to_api_value()
+    return layer
 
 
 def _check_common_text(
@@ -189,17 +195,18 @@ def validate_metadata_params(
 def validate_data_layer_params(
     db: str,
     frequency: Frequency | str,
-    layer: str,
+    layer: Layer | str,
     start_date: str | None = None,
     end_date: str | None = None,
     start_position: int | None = None,
 ) -> list[str]:
     normalized_frequency = coerce_frequency(frequency)
+    normalized_layer = coerce_layer(layer)
 
     errors: list[str] = []
     errors.extend(_validate_db_name(db))
     errors.extend(_check_common_text("frequency", normalized_frequency, required=True))
-    errors.extend(_check_common_text("layer", layer, required=True))
+    errors.extend(_check_common_text("layer", normalized_layer, required=True))
     errors.extend(_validate_start_position(start_position))
 
     frequency_valid = False
@@ -209,8 +216,8 @@ def validate_data_layer_params(
         else:
             frequency_valid = True
 
-    if isinstance(layer, str) and layer != "":
-        layer_parts = [part.strip() for part in layer.split(",")]
+    if isinstance(normalized_layer, str) and normalized_layer != "":
+        layer_parts = [part.strip() for part in normalized_layer.split(",")]
         if len(layer_parts) < 1 or len(layer_parts) > 5:
             errors.append("layer: must have between 1 and 5 comma-separated values")
         if any(part == "" for part in layer_parts):

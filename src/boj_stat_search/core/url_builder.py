@@ -2,9 +2,10 @@ from typing import Any
 import warnings
 from urllib.parse import SplitResult, urlencode, urlunsplit
 
-from boj_stat_search.core.types import ErrorMode, Frequency
+from boj_stat_search.core.types import ErrorMode, Frequency, Layer
 from boj_stat_search.core.validator import (
     coerce_frequency,
+    coerce_layer,
     validate_data_code_params,
     validate_data_layer_params,
     validate_metadata_params,
@@ -101,18 +102,19 @@ def build_data_code_api_url(
 def build_data_layer_api_url(
     db: str,
     frequency: Frequency | str,
-    layer: str,
+    layer: Layer | str,
     start_date: str | None = None,
     end_date: str | None = None,
     start_position: int | None = None,
     on_validation_error: ErrorMode = "raise",
 ) -> str:
     normalized_frequency: Any = coerce_frequency(frequency)
+    normalized_layer: Any = coerce_layer(layer)
 
     validation_errors = validate_data_layer_params(
         db=db,
         frequency=normalized_frequency,
-        layer=layer,
+        layer=normalized_layer,
         start_date=start_date,
         end_date=end_date,
         start_position=start_position,
@@ -122,7 +124,7 @@ def build_data_layer_api_url(
     query_params: dict[str, str | int] = {
         "db": db,
         "frequency": normalized_frequency,
-        "layer": layer,
+        "layer": normalized_layer,
     }
     if start_date is not None:
         query_params["startDate"] = start_date
