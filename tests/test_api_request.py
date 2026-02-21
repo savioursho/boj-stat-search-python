@@ -1,8 +1,10 @@
 from unittest.mock import Mock
 
+import httpx
 import pytest
 
 from boj_stat_search.api import (
+    BojApiError,
     get_data_code,
     get_data_code_raw,
     get_data_layer,
@@ -771,3 +773,39 @@ def test_get_data_layer_warns_and_returns_parsed_response_on_invalid_params():
         next_position=None,
         result_set=(),
     )
+
+
+def test_get_metadata_raw_raises_boj_api_error_with_json_details():
+    db = "IR01"
+    expected_url = build_metadata_api_url(db)
+    response = httpx.Response(
+        status_code=400,
+        request=httpx.Request("GET", expected_url),
+        json={
+            "STATUS": 400,
+            "MESSAGEID": "E181001",
+            "MESSAGE": "invalid db parameter",
+        },
+    )
+
+    client = Mock()
+    client.get.return_value = response
+
+    with pytest.raises(BojApiError, match="message_id=E181001"):
+        get_metadata_raw(db, client=client)
+
+
+def test_get_metadata_raw_keeps_http_status_error_when_body_is_not_json():
+    db = "IR01"
+    expected_url = build_metadata_api_url(db)
+    response = httpx.Response(
+        status_code=500,
+        request=httpx.Request("GET", expected_url),
+        content="server error",
+    )
+
+    client = Mock()
+    client.get.return_value = response
+
+    with pytest.raises(httpx.HTTPStatusError):
+        get_metadata_raw(db, client=client)
