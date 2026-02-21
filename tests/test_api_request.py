@@ -355,9 +355,7 @@ def test_get_data_code_warns_and_returns_parsed_response_on_invalid_params():
     db = "FM01"
     code = "STRDCLUCON"
     start_position = 0
-    expected_url = (
-        "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=STRDCLUCON&startPosition=0"
-    )
+    expected_url = "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=STRDCLUCON&startPosition=0"
     raw_payload = {
         "STATUS": 200,
         "MESSAGEID": "M181000I",
@@ -670,9 +668,7 @@ def test_get_data_layer_warns_and_returns_parsed_response_on_invalid_params():
     db = "MD10"
     frequency = "X"
     layer = "*"
-    expected_url = (
-        "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=MD10&frequency=X&layer=*"
-    )
+    expected_url = "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=MD10&frequency=X&layer=*"
     raw_payload = {
         "STATUS": 200,
         "MESSAGEID": "M181000I",
