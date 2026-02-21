@@ -15,8 +15,12 @@
 - Run tests: `uv run pytest -q`
 - Run a specific test file: `uv run pytest -q tests/test_validator.py`
 - Lint: `uv run ruff check src tests`
+- Format: `uv run ruff format`
+- Type check: `uv run ty check`
 - Run both checks before PR:
+  - `uv run ruff format`
   - `uv run ruff check src tests`
+  - `uv run ty check`
   - `uv run pytest -q`
 
 ## Coding Style & Naming Conventions
