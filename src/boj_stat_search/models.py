@@ -28,22 +28,23 @@ class MetadataEntry:
     notes_j: str
     notes: str
 
+
 @dataclass(frozen=True)
-class MetadataResponse:
+class BaseResponse:
     status: int
     message_id: str
     message: str
     date: str
+
+
+@dataclass(frozen=True)
+class MetadataResponse(BaseResponse):
     db: str
     result_set: tuple[MetadataEntry, ...]
 
 
 @dataclass(frozen=True)
-class DataResponse:
-    status: int
-    message_id: str
-    message: str
-    date: str
+class DataResponse(BaseResponse):
     parameter: dict[str, Any]
     next_position: int | None
     result_set: tuple[dict[str, Any], ...]
