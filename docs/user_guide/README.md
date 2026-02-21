@@ -23,6 +23,9 @@ This guide explains how to use the top-level `boj_stat_search` API for common ta
   - `show_layers`
   - `list_db`
   - `Frequency`, `Layer`, `Period`
+  - `BojApiError`
+  - `DataResponse`, `MetadataResponse`, `DbInfo`
+  - Pagination, error handling, HTTP client reuse
 - Not covered:
   - raw API variants (`get_*_raw`)
   - low-level URL builders, validators, and parsers

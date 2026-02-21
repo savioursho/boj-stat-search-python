@@ -12,6 +12,7 @@ from boj_stat_search.display import show_layers
 from boj_stat_search.models import (
     BaseResponse,
     DataResponse,
+    DbInfo,
     MetadataEntry,
     MetadataResponse,
 )
@@ -28,6 +29,7 @@ __all__ = [
     "Layer",
     "Period",
     "BaseResponse",
+    "DbInfo",
     "MetadataEntry",
     "MetadataResponse",
     "DataResponse",

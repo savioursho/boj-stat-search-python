@@ -55,6 +55,7 @@ def test_top_level_has_expected_public_symbols():
         "Layer",
         "Period",
         "BaseResponse",
+        "DbInfo",
         "MetadataEntry",
         "MetadataResponse",
         "DataResponse",

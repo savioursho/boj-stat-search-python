@@ -37,15 +37,113 @@ response = get_data_layer(
 print(response.status, len(response.result_set))
 ```
 
+## Reading DataResponse Results
+
+`DataResponse.result_set` is a `tuple[dict[str, Any], ...]`. Each entry is a dict with these typical keys:
+
+- `SERIES_CODE` — the series identifier
+- `VALUES` — a dict containing:
+  - `SURVEY_DATES` — list of date strings for each observation
+  - `VALUES` — list of value strings for each observation
+
+```python
+for entry in response.result_set:
+    print(entry["SERIES_CODE"])
+    for date, value in zip(
+        entry["VALUES"]["SURVEY_DATES"],
+        entry["VALUES"]["VALUES"],
+    ):
+        print(f"  {date}: {value}")
+```
+
+## Pagination
+
+The BOJ API paginates large result sets. `DataResponse` exposes `next_position: int | None` — when it is not `None`, more pages are available.
+
+Pass `start_position` to fetch the next page:
+
+```python
+from boj_stat_search import Frequency, Layer, Period, get_data_layer
+
+results = []
+start_position = None
+
+while True:
+    response = get_data_layer(
+        db="BP01",
+        frequency=Frequency.MONTHLY,
+        layer=Layer(1, 1, 1),
+        start_date=Period.month(2025, 4),
+        end_date=Period.month(2025, 9),
+        start_position=start_position,
+    )
+    results.extend(response.result_set)
+
+    if response.next_position is None:
+        break
+    start_position = response.next_position
+
+print(f"Total entries: {len(results)}")
+```
+
+`get_data_code` supports the same `start_position` parameter.
+
+## Error Handling
+
+When the BOJ API returns an HTTP error (4xx/5xx), a `BojApiError` is raised. It extends `httpx.HTTPStatusError` and carries extra fields from the BOJ response body:
+
+- `boj_status` (`int | None`) — the `STATUS` field from the BOJ JSON response
+- `message_id` (`str | None`) — the `MESSAGEID` field
+- `boj_message` (`str | None`) — the `MESSAGE` field
+
+```python
+from boj_stat_search import BojApiError, get_metadata
+
+try:
+    response = get_metadata(db="INVALID")
+except BojApiError as exc:
+    print(exc.boj_status)    # e.g. 404
+    print(exc.message_id)    # e.g. "ERR_001"
+    print(exc.boj_message)   # human-readable error from BOJ
+    print(exc.response)      # the underlying httpx.Response
+```
+
+## Reusing an HTTP Client
+
+All API functions accept an optional `client` keyword argument (`httpx.Client | None`). Passing a shared client reuses the underlying TCP connection, which is useful for batched calls or pagination loops:
+
+```python
+import httpx
+from boj_stat_search import get_metadata, list_db
+
+with httpx.Client() as client:
+    for db_info in list_db():
+        response = get_metadata(db_info.name, client=client)
+        print(db_info.name, len(response.result_set))
+```
+
 ## Parameter Helpers
 
-- `Frequency`: enum for valid frequency values (`CY`, `FY`, `CH`, `FH`, `Q`, `M`, `W`, `D`)
+- `Frequency`: enum for valid frequency values
+
+  | Member             | API value |
+  |--------------------|-----------|
+  | `CALENDAR_YEAR`    | `CY`      |
+  | `FISCAL_YEAR`      | `FY`      |
+  | `CALENDAR_HALF`    | `CH`      |
+  | `FISCAL_HALF`      | `FH`      |
+  | `QUARTERLY`        | `Q`       |
+  | `MONTHLY`          | `M`       |
+  | `WEEKLY`           | `W`       |
+  | `DAILY`            | `D`       |
+
 - `Layer`: helper for layer paths (`Layer(1, 1, 1)`, `Layer("*")`)
 - `Period`: helper for date values
   - `Period.year(2025)`
   - `Period.half(2025, 1)`
   - `Period.quarter(2025, 2)`
   - `Period.month(2025, 9)`
+  - `Period("202501")` and `Period.from_string("202501")` also work for direct string input.
 
 ## Date Notes
 
@@ -77,6 +175,7 @@ get_data_layer(
 
 ```python
 from boj_stat_search import (
+    BojApiError,
     Frequency,
     Layer,
     Period,
