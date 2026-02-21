@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 @dataclass(frozen=True)
 class DbInfo:
@@ -36,4 +37,14 @@ class MetadataResponse:
     db: str
     result_set: tuple[MetadataEntry, ...]
 
+
+@dataclass(frozen=True)
+class DataCodeResponse:
+    status: int
+    message_id: str
+    message: str
+    date: str
+    parameter: dict[str, Any]
+    next_position: int | None
+    result_set: tuple[dict[str, Any], ...]
 

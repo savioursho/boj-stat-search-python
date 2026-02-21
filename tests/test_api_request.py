@@ -1,8 +1,12 @@
 from unittest.mock import Mock
 
-from boj_stat_search.api_request import get_metadata, get_metadata_raw
+from boj_stat_search.api_request import (
+    get_data_code_raw,
+    get_metadata,
+    get_metadata_raw,
+)
 from boj_stat_search.models import MetadataEntry, MetadataResponse
-from boj_stat_search.url_builder import build_metadata_api_url
+from boj_stat_search.url_builder import build_data_code_api_url, build_metadata_api_url
 
 
 def test_get_metadata_raw_uses_client_and_returns_json():
@@ -99,3 +103,29 @@ def test_get_metadata_uses_client_and_returns_parsed_response():
             ),
         ),
     )
+
+
+def test_get_data_code_raw_uses_client_and_returns_json():
+    db = "FM01"
+    code = "STRDCLUCON,STRACLUCON"
+    expected_url = build_data_code_api_url(db=db, code=code)
+    expected_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DB": db,
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(db=db, code=code, client=client)
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
