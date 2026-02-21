@@ -78,10 +78,20 @@ def get_data_layer_raw(
     db: str,
     frequency: str,
     layer: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    start_position: int | None = None,
     *,
     client: httpx.Client | None = None,
 ) -> dict[str, Any]:
-    url = build_data_layer_api_url(db=db, frequency=frequency, layer=layer)
+    url = build_data_layer_api_url(
+        db=db,
+        frequency=frequency,
+        layer=layer,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+    )
     return _get_json(url, client=client)
 
 
@@ -89,6 +99,9 @@ def get_data_layer(
     db: str,
     frequency: str,
     layer: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    start_position: int | None = None,
     *,
     client: httpx.Client | None = None,
 ) -> DataResponse:
@@ -96,6 +109,9 @@ def get_data_layer(
         db=db,
         frequency=frequency,
         layer=layer,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
         client=client,
     )
     return parse_data_code_response(raw)

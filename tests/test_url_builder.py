@@ -68,6 +68,36 @@ def test_build_data_layer_api_url_returns_expected_url_for_wildcard_layer():
     )
 
 
+def test_build_data_layer_api_url_returns_expected_url_with_optional_params():
+    result = build_data_layer_api_url(
+        db="BP01",
+        frequency="M",
+        layer="1,1,1",
+        start_date="202504",
+        end_date="202509",
+        start_position=255,
+    )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=BP01&frequency=M&layer=1,1,1&startDate=202504&endDate=202509&startPosition=255"
+    )
+
+
+def test_build_data_layer_api_url_returns_expected_url_with_partial_optional_params():
+    result = build_data_layer_api_url(
+        db="MD10",
+        frequency="Q",
+        layer="*",
+        start_position=255,
+    )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=MD10&frequency=Q&layer=*&startPosition=255"
+    )
+
+
 def test_build_data_layer_api_url_returns_expected_url_for_comma_layer():
     result = build_data_layer_api_url(db="BP01", frequency="M", layer="1,1,1")
 
