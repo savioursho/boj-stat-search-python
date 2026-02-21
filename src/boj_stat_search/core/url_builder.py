@@ -1,14 +1,13 @@
 import warnings
-from typing import Literal
 from urllib.parse import SplitResult, urlencode, urlunsplit
 
+from boj_stat_search.core.types import ErrorMode
 from boj_stat_search.core.validator import (
     validate_data_code_params,
     validate_data_layer_params,
     validate_metadata_params,
 )
 
-ErrorMode = Literal["raise", "warn", "ignore"]
 _VALIDATION_ERROR_MODES: tuple[ErrorMode, ...] = ("raise", "warn", "ignore")
 
 SCHEME = "https"

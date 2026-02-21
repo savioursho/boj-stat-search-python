@@ -6,8 +6,8 @@ from boj_stat_search.core.parser import (
     parse_data_code_response,
     parse_metadata_response,
 )
+from boj_stat_search.core.types import ErrorMode
 from boj_stat_search.core.url_builder import (
-    ErrorMode,
     build_data_code_api_url,
     build_data_layer_api_url,
     build_metadata_api_url,
