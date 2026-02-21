@@ -1,6 +1,8 @@
+from typing import cast
+
 import pytest
 
-from boj_stat_search.core.types import Frequency, Layer
+from boj_stat_search.core.types import ErrorMode, Frequency, Layer
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -44,7 +46,7 @@ def test_build_metadata_api_url_raises_on_invalid_on_validation_error_mode():
     with pytest.raises(ValueError, match="on_validation_error"):
         build_metadata_api_url(
             db="IR01",
-            on_validation_error="invalid",
+            on_validation_error=cast(ErrorMode, "invalid"),
         )
 
 
@@ -254,7 +256,7 @@ def test_build_data_code_api_url_raises_on_invalid_on_validation_error_mode():
         build_data_code_api_url(
             db="FM01",
             code="STRDCLUCON",
-            on_validation_error="invalid",
+            on_validation_error=cast(ErrorMode, "invalid"),
         )
 
 
@@ -293,5 +295,5 @@ def test_build_data_layer_api_url_raises_on_invalid_on_validation_error_mode():
             db="MD10",
             frequency="Q",
             layer="*",
-            on_validation_error="invalid",
+            on_validation_error=cast(ErrorMode, "invalid"),
         )
