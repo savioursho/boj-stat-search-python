@@ -81,6 +81,15 @@ def test_validate_data_code_params_rejects_date_granularity_mismatch():
     assert _has_error(errors, "same date granularity")
 
 
+def test_validate_data_code_params_rejects_unknown_db():
+    errors = validate_data_code_params(
+        db="UNKNOWN",
+        code="STRDCLUCON",
+    )
+
+    assert _has_error(errors, "_DB_CATALOG")
+
+
 def test_validate_data_layer_params_accepts_valid_q_dates():
     errors = validate_data_layer_params(
         db="BP01",
@@ -157,3 +166,13 @@ def test_validate_data_layer_params_rejects_non_ascii_db():
     )
 
     assert _has_error(errors, "ASCII")
+
+
+def test_validate_data_layer_params_rejects_unknown_db():
+    errors = validate_data_layer_params(
+        db="UNKNOWN",
+        frequency="M",
+        layer="*",
+    )
+
+    assert _has_error(errors, "_DB_CATALOG")

@@ -129,6 +129,16 @@ def test_build_data_layer_api_url_raises_on_invalid_layer():
         build_data_layer_api_url(db="MD10", frequency="Q", layer="1,a")
 
 
+def test_build_data_code_api_url_raises_on_unknown_db():
+    with pytest.raises(ValueError, match="_DB_CATALOG"):
+        build_data_code_api_url(db="UNKNOWN", code="STRDCLUCON")
+
+
+def test_build_data_layer_api_url_raises_on_unknown_db():
+    with pytest.raises(ValueError, match="_DB_CATALOG"):
+        build_data_layer_api_url(db="UNKNOWN", frequency="Q", layer="*")
+
+
 def test_build_data_code_api_url_warns_and_returns_url_on_invalid_params():
     with pytest.warns(UserWarning, match="Invalid parameters"):
         result = build_data_code_api_url(

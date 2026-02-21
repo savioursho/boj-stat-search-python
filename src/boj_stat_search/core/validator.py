@@ -1,8 +1,11 @@
 from typing import Any
 
+from boj_stat_search.core.database import _DB_CATALOG
+
 
 FORBIDDEN_CHARS = ("<", ">", '"', "”", "!", "|", "\\", ";", "'")
 ALLOWED_FREQUENCIES = {"CY", "FY", "CH", "FH", "Q", "M", "W", "D"}
+VALID_DB_NAMES = {db_info.name for db_info in _DB_CATALOG}
 
 
 def _check_common_text(
@@ -41,6 +44,17 @@ def _validate_start_position(start_position: Any) -> list[str]:
         return ["start_position: must be an integer >= 1"]
     if start_position < 1:
         return ["start_position: must be an integer >= 1"]
+    return []
+
+
+def _validate_db_name(db: Any) -> list[str]:
+    errors = _check_common_text("db", db, required=True)
+    if errors:
+        return errors
+
+    assert isinstance(db, str)
+    if db not in VALID_DB_NAMES:
+        return ["db: must be one of known DB names in _DB_CATALOG"]
     return []
 
 
@@ -111,7 +125,7 @@ def validate_data_code_params(
     start_position: int | None = None,
 ) -> list[str]:
     errors: list[str] = []
-    errors.extend(_check_common_text("db", db, required=True))
+    errors.extend(_validate_db_name(db))
     errors.extend(_check_common_text("code", code, required=True))
     errors.extend(_validate_start_position(start_position))
 
@@ -164,7 +178,7 @@ def validate_data_layer_params(
     start_position: int | None = None,
 ) -> list[str]:
     errors: list[str] = []
-    errors.extend(_check_common_text("db", db, required=True))
+    errors.extend(_validate_db_name(db))
     errors.extend(_check_common_text("frequency", frequency, required=True))
     errors.extend(_check_common_text("layer", layer, required=True))
     errors.extend(_validate_start_position(start_position))
