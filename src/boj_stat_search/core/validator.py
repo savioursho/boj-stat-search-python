@@ -97,7 +97,9 @@ def _validate_date_for_frequency(
         return [], True
 
     if value_tail < 1 or value_tail > 12:
-        return [f"{name}: MM must be between 01 and 12 for frequency {frequency}"], False
+        return [
+            f"{name}: MM must be between 01 and 12 for frequency {frequency}"
+        ], False
     return [], True
 
 
@@ -172,9 +174,7 @@ def validate_data_layer_params(
     if isinstance(frequency, str) and frequency != "":
         normalized_frequency = frequency.upper()
         if normalized_frequency not in ALLOWED_FREQUENCIES:
-            errors.append(
-                "frequency: must be one of CY, FY, CH, FH, Q, M, W, D"
-            )
+            errors.append("frequency: must be one of CY, FY, CH, FH, Q, M, W, D")
         else:
             frequency_valid = True
 

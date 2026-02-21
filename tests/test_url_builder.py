@@ -127,3 +127,76 @@ def test_build_data_layer_api_url_raises_on_invalid_frequency():
 def test_build_data_layer_api_url_raises_on_invalid_layer():
     with pytest.raises(ValueError, match="layer"):
         build_data_layer_api_url(db="MD10", frequency="Q", layer="1,a")
+
+
+def test_build_data_code_api_url_warns_and_returns_url_on_invalid_params():
+    with pytest.warns(UserWarning, match="Invalid parameters"):
+        result = build_data_code_api_url(
+            db="FM01",
+            code="STRDCLUCON",
+            start_position=0,
+            errors="warn",
+        )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=STRDCLUCON&startPosition=0"
+    )
+
+
+def test_build_data_code_api_url_ignores_invalid_params_and_returns_url():
+    result = build_data_code_api_url(
+        db="FM01",
+        code="STRDCLUCON",
+        start_position=0,
+        errors="ignore",
+    )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=STRDCLUCON&startPosition=0"
+    )
+
+
+def test_build_data_code_api_url_raises_on_invalid_errors_mode():
+    with pytest.raises(ValueError, match="errors"):
+        build_data_code_api_url(db="FM01", code="STRDCLUCON", errors="invalid")
+
+
+def test_build_data_layer_api_url_warns_and_returns_url_on_invalid_params():
+    with pytest.warns(UserWarning, match="Invalid parameters"):
+        result = build_data_layer_api_url(
+            db="MD10",
+            frequency="X",
+            layer="*",
+            errors="warn",
+        )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=MD10&frequency=X&layer=*"
+    )
+
+
+def test_build_data_layer_api_url_ignores_invalid_params_and_returns_url():
+    result = build_data_layer_api_url(
+        db="MD10",
+        frequency="Q",
+        layer="1,a",
+        errors="ignore",
+    )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=MD10&frequency=Q&layer=1,a"
+    )
+
+
+def test_build_data_layer_api_url_raises_on_invalid_errors_mode():
+    with pytest.raises(ValueError, match="errors"):
+        build_data_layer_api_url(
+            db="MD10",
+            frequency="Q",
+            layer="*",
+            errors="invalid",
+        )
