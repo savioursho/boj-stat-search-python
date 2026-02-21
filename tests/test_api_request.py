@@ -3,11 +3,17 @@ from unittest.mock import Mock
 from boj_stat_search.api_request import (
     get_data_code,
     get_data_code_raw,
+    get_data_layer,
+    get_data_layer_raw,
     get_metadata,
     get_metadata_raw,
 )
 from boj_stat_search.models import DataCodeResponse, MetadataEntry, MetadataResponse
-from boj_stat_search.url_builder import build_data_code_api_url, build_metadata_api_url
+from boj_stat_search.url_builder import (
+    build_data_code_api_url,
+    build_data_layer_api_url,
+    build_metadata_api_url,
+)
 
 
 def test_get_metadata_raw_uses_client_and_returns_json():
@@ -204,6 +210,127 @@ def test_get_data_code_uses_client_and_returns_parsed_response():
                     "SURVEY_DATES": [19980105, 19980106],
                     "VALUES": [0.49, None],
                 },
+            },
+        ),
+    )
+
+
+def test_get_data_layer_raw_uses_client_and_returns_json():
+    db = "MD10"
+    frequency = "Q"
+    layer = "*"
+    expected_url = build_data_layer_api_url(db=db, frequency=frequency, layer=layer)
+    expected_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T16:42:00.000+09:00",
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_layer_raw(
+        db=db,
+        frequency=frequency,
+        layer=layer,
+        client=client,
+    )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
+def test_get_data_layer_uses_client_and_returns_parsed_response():
+    db = "MD10"
+    frequency = "Q"
+    layer = "*"
+    expected_url = build_data_layer_api_url(db=db, frequency=frequency, layer=layer)
+    raw_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T16:42:00.000+09:00",
+        "PARAMETER": {
+            "FORMAT": "",
+            "LANG": "",
+            "DB": db,
+            "FREQUENCY": frequency,
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+            "LAYER1": "*",
+            "LAYER2": "",
+            "LAYER3": "",
+            "LAYER4": "",
+            "LAYER5": "",
+        },
+        "NEXTPOSITION": 255,
+        "RESULTSET": [
+            {
+                "SERIES_CODE": "",
+                "NAME_OF_TIME_SERIES_J": "Deposits",
+                "UNIT_J": "",
+                "FREQUENCY": "",
+                "CATEGORY_J": "",
+                "LAST_UPDATE": "",
+                "VALUES": {"SURVEY_DATES": [], "VALUES": []},
+            }
+        ],
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = raw_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_layer(
+        db=db,
+        frequency=frequency,
+        layer=layer,
+        client=client,
+    )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == DataCodeResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T16:42:00.000+09:00",
+        parameter={
+            "FORMAT": "",
+            "LANG": "",
+            "DB": db,
+            "FREQUENCY": frequency,
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+            "LAYER1": "*",
+            "LAYER2": "",
+            "LAYER3": "",
+            "LAYER4": "",
+            "LAYER5": "",
+        },
+        next_position=255,
+        result_set=(
+            {
+                "SERIES_CODE": "",
+                "NAME_OF_TIME_SERIES_J": "Deposits",
+                "UNIT_J": "",
+                "FREQUENCY": "",
+                "CATEGORY_J": "",
+                "LAST_UPDATE": "",
+                "VALUES": {"SURVEY_DATES": [], "VALUES": []},
             },
         ),
     )
