@@ -12,6 +12,7 @@ from boj_stat_search.api import (
 from boj_stat_search.core import Frequency as CoreFrequency
 from boj_stat_search.core import Layer as CoreLayer
 from boj_stat_search.core import Period as CorePeriod
+from boj_stat_search.display import show_layers as display_show_layers
 from boj_stat_search.models import (
     BaseResponse as ModelsBaseResponse,
     DataResponse as ModelsDataResponse,
@@ -28,6 +29,7 @@ def test_top_level_re_exports_functional_api():
     assert bss.get_data_code is api_get_data_code
     assert bss.get_data_layer_raw is api_get_data_layer_raw
     assert bss.get_data_layer is api_get_data_layer
+    assert bss.show_layers is display_show_layers
 
 
 def test_top_level_re_exports_key_types_and_models():
@@ -57,5 +59,6 @@ def test_top_level_has_expected_public_symbols():
         "MetadataResponse",
         "DataResponse",
         "list_db",
+        "show_layers",
     }
     assert set(bss.__all__) == expected

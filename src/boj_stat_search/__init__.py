@@ -8,6 +8,7 @@ from boj_stat_search.api import (
     get_metadata_raw,
 )
 from boj_stat_search.core import Frequency, Layer, Period, list_db
+from boj_stat_search.display import show_layers
 from boj_stat_search.models import (
     BaseResponse,
     DataResponse,
@@ -31,6 +32,7 @@ __all__ = [
     "MetadataResponse",
     "DataResponse",
     "list_db",
+    "show_layers",
 ]
 
 

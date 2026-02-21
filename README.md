@@ -23,3 +23,10 @@ response = get_data_layer(
 )
 print(response.status, len(response.result_set))
 ```
+
+```python
+from boj_stat_search import get_metadata, show_layers
+
+metadata = get_metadata(db="BP01")
+show_layers(metadata.result_set, layer="1,1")
+```
