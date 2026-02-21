@@ -1,11 +1,12 @@
 from unittest.mock import Mock
 
 from boj_stat_search.api_request import (
+    get_data_code,
     get_data_code_raw,
     get_metadata,
     get_metadata_raw,
 )
-from boj_stat_search.models import MetadataEntry, MetadataResponse
+from boj_stat_search.models import DataCodeResponse, MetadataEntry, MetadataResponse
 from boj_stat_search.url_builder import build_data_code_api_url, build_metadata_api_url
 
 
@@ -129,3 +130,80 @@ def test_get_data_code_raw_uses_client_and_returns_json():
     response.raise_for_status.assert_called_once_with()
     response.json.assert_called_once_with()
     assert result == expected_payload
+
+
+def test_get_data_code_uses_client_and_returns_parsed_response():
+    db = "FM01"
+    code = "STRDCLUCON"
+    expected_url = build_data_code_api_url(db=db, code=code)
+    raw_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T15:58:56.071+09:00",
+        "PARAMETER": {
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": db,
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+        },
+        "NEXTPOSITION": None,
+        "RESULTSET": [
+            {
+                "SERIES_CODE": "STRDCLUCON",
+                "NAME_OF_TIME_SERIES": "Call Rate, Uncollateralized Overnight",
+                "UNIT": "percent per annum",
+                "FREQUENCY": "DAILY",
+                "CATEGORY": "Call Rate",
+                "LAST_UPDATE": 20260220,
+                "VALUES": {
+                    "SURVEY_DATES": [19980105, 19980106],
+                    "VALUES": [0.49, None],
+                },
+            }
+        ],
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = raw_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code(db=db, code=code, client=client)
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == DataCodeResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T15:58:56.071+09:00",
+        parameter={
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": db,
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+        },
+        next_position=None,
+        result_set=(
+            {
+                "SERIES_CODE": "STRDCLUCON",
+                "NAME_OF_TIME_SERIES": "Call Rate, Uncollateralized Overnight",
+                "UNIT": "percent per annum",
+                "FREQUENCY": "DAILY",
+                "CATEGORY": "Call Rate",
+                "LAST_UPDATE": 20260220,
+                "VALUES": {
+                    "SURVEY_DATES": [19980105, 19980106],
+                    "VALUES": [0.49, None],
+                },
+            },
+        ),
+    )
