@@ -135,7 +135,7 @@ def test_build_data_code_api_url_warns_and_returns_url_on_invalid_params():
             db="FM01",
             code="STRDCLUCON",
             start_position=0,
-            errors="warn",
+            on_validation_error="warn",
         )
 
     assert (
@@ -149,7 +149,7 @@ def test_build_data_code_api_url_ignores_invalid_params_and_returns_url():
         db="FM01",
         code="STRDCLUCON",
         start_position=0,
-        errors="ignore",
+        on_validation_error="ignore",
     )
 
     assert (
@@ -158,9 +158,13 @@ def test_build_data_code_api_url_ignores_invalid_params_and_returns_url():
     )
 
 
-def test_build_data_code_api_url_raises_on_invalid_errors_mode():
-    with pytest.raises(ValueError, match="errors"):
-        build_data_code_api_url(db="FM01", code="STRDCLUCON", errors="invalid")
+def test_build_data_code_api_url_raises_on_invalid_on_validation_error_mode():
+    with pytest.raises(ValueError, match="on_validation_error"):
+        build_data_code_api_url(
+            db="FM01",
+            code="STRDCLUCON",
+            on_validation_error="invalid",
+        )
 
 
 def test_build_data_layer_api_url_warns_and_returns_url_on_invalid_params():
@@ -169,7 +173,7 @@ def test_build_data_layer_api_url_warns_and_returns_url_on_invalid_params():
             db="MD10",
             frequency="X",
             layer="*",
-            errors="warn",
+            on_validation_error="warn",
         )
 
     assert (
@@ -183,7 +187,7 @@ def test_build_data_layer_api_url_ignores_invalid_params_and_returns_url():
         db="MD10",
         frequency="Q",
         layer="1,a",
-        errors="ignore",
+        on_validation_error="ignore",
     )
 
     assert (
@@ -192,11 +196,11 @@ def test_build_data_layer_api_url_ignores_invalid_params_and_returns_url():
     )
 
 
-def test_build_data_layer_api_url_raises_on_invalid_errors_mode():
-    with pytest.raises(ValueError, match="errors"):
+def test_build_data_layer_api_url_raises_on_invalid_on_validation_error_mode():
+    with pytest.raises(ValueError, match="on_validation_error"):
         build_data_layer_api_url(
             db="MD10",
             frequency="Q",
             layer="*",
-            errors="invalid",
+            on_validation_error="invalid",
         )
