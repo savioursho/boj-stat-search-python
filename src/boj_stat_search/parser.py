@@ -1,6 +1,6 @@
 from typing import Any
 
-from boj_stat_search.models import MetadataEntry, MetadataResponse
+from boj_stat_search.models import MetadataEntry, MetadataResponse, DataCodeResponse
 
 
 def _parse_metadata_entry(raw: dict[str, Any]) -> MetadataEntry:
@@ -36,5 +36,34 @@ def parse_metadata_response(raw: dict[str, Any]) -> MetadataResponse:
         message=str(raw.get("MESSAGE", "")),
         date=str(raw.get("DATE", "")),
         db=str(raw.get("DB", "")),
+        result_set=result_set,
+    )
+
+def parse_data_code_response(raw: dict[str, Any]) -> DataCodeResponse:
+    parameter_raw = raw.get("PARAMETER", {})
+    if isinstance(parameter_raw, dict):
+        parameter = {str(k): v for k, v in parameter_raw.items()}
+    else:
+        parameter = {}
+
+    result_set_raw = raw.get("RESULTSET", [])
+    if isinstance(result_set_raw, list):
+        result_set = tuple(entry for entry in result_set_raw if isinstance(entry, dict))
+    else:
+        result_set = ()
+
+    next_position_raw = raw.get("NEXTPOSITION")
+    if next_position_raw in (None, ""):
+        next_position = None
+    else:
+        next_position = int(next_position_raw)
+
+    return DataCodeResponse(
+        status=int(raw.get("STATUS", 0)),
+        message_id=str(raw.get("MESSAGEID", "")),
+        message=str(raw.get("MESSAGE", "")),
+        date=str(raw.get("DATE", "")),
+        parameter=parameter,
+        next_position=next_position,
         result_set=result_set,
     )

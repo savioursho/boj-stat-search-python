@@ -1,5 +1,5 @@
-from boj_stat_search.models import MetadataEntry, MetadataResponse
-from boj_stat_search.parser import parse_metadata_response
+from boj_stat_search.models import DataCodeResponse, MetadataEntry, MetadataResponse
+from boj_stat_search.parser import parse_data_code_response, parse_metadata_response
 
 
 def test_parse_metadata_response_parses_normal_payload():
@@ -82,5 +82,90 @@ def test_parse_metadata_response_handles_error_payload_without_db_and_resultset(
         message="Invalid input parameters",
         date="2026-02-21T05:00:12.008+09:00",
         db="",
+        result_set=(),
+    )
+
+
+def test_parse_data_code_response_parses_normal_payload():
+    raw = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T15:58:56.071+09:00",
+        "PARAMETER": {
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": "FM01",
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+        },
+        "NEXTPOSITION": 255,
+        "RESULTSET": [
+            {
+                "SERIES_CODE": "STRDCLUCON",
+                "NAME_OF_TIME_SERIES": "Call Rate, Uncollateralized Overnight",
+                "UNIT": "percent per annum",
+                "FREQUENCY": "DAILY",
+                "CATEGORY": "Call Rate",
+                "LAST_UPDATE": 20260220,
+                "VALUES": {
+                    "SURVEY_DATES": [19980105, 19980106],
+                    "VALUES": [0.49, None],
+                },
+            }
+        ],
+    }
+
+    result = parse_data_code_response(raw)
+
+    assert result == DataCodeResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T15:58:56.071+09:00",
+        parameter={
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": "FM01",
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+        },
+        next_position=255,
+        result_set=(
+            {
+                "SERIES_CODE": "STRDCLUCON",
+                "NAME_OF_TIME_SERIES": "Call Rate, Uncollateralized Overnight",
+                "UNIT": "percent per annum",
+                "FREQUENCY": "DAILY",
+                "CATEGORY": "Call Rate",
+                "LAST_UPDATE": 20260220,
+                "VALUES": {
+                    "SURVEY_DATES": [19980105, 19980106],
+                    "VALUES": [0.49, None],
+                },
+            },
+        ),
+    )
+
+
+def test_parse_data_code_response_handles_error_payload_with_missing_fields():
+    raw = {
+        "STATUS": 400,
+        "MESSAGEID": "M181001E",
+        "MESSAGE": "Invalid input parameters",
+        "DATE": "2026-02-21T15:58:56.071+09:00",
+    }
+
+    result = parse_data_code_response(raw)
+
+    assert result == DataCodeResponse(
+        status=400,
+        message_id="M181001E",
+        message="Invalid input parameters",
+        date="2026-02-21T15:58:56.071+09:00",
+        parameter={},
+        next_position=None,
         result_set=(),
     )
