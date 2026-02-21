@@ -1,4 +1,6 @@
 import httpx
+from typing import Any
+
 from boj_stat_search.models import DataResponse, MetadataResponse
 from boj_stat_search.core.parser import (
     parse_data_code_response,
@@ -11,9 +13,7 @@ from boj_stat_search.core.url_builder import (
 )
 
 
-def get_metadata_raw(db: str, *, client: httpx.Client | None = None) -> dict:
-    url = build_metadata_api_url(db)
-
+def _get_json(url: str, *, client: httpx.Client | None = None) -> dict[str, Any]:
     if client is not None:
         response = client.get(url)
         response.raise_for_status()
@@ -23,6 +23,11 @@ def get_metadata_raw(db: str, *, client: httpx.Client | None = None) -> dict:
         response = local_client.get(url)
         response.raise_for_status()
         return response.json()
+
+
+def get_metadata_raw(db: str, *, client: httpx.Client | None = None) -> dict[str, Any]:
+    url = build_metadata_api_url(db)
+    return _get_json(url, client=client)
 
 
 def get_metadata(db: str, *, client: httpx.Client | None = None) -> MetadataResponse:
@@ -32,18 +37,9 @@ def get_metadata(db: str, *, client: httpx.Client | None = None) -> MetadataResp
 
 def get_data_code_raw(
     db: str, code: str, *, client: httpx.Client | None = None
-) -> dict:
+) -> dict[str, Any]:
     url = build_data_code_api_url(db, code)
-
-    if client is not None:
-        response = client.get(url)
-        response.raise_for_status()
-        return response.json()
-
-    with httpx.Client() as local_client:
-        response = local_client.get(url)
-        response.raise_for_status()
-        return response.json()
+    return _get_json(url, client=client)
 
 
 def get_data_code(
@@ -59,18 +55,9 @@ def get_data_layer_raw(
     layer: str,
     *,
     client: httpx.Client | None = None,
-) -> dict:
+) -> dict[str, Any]:
     url = build_data_layer_api_url(db=db, frequency=frequency, layer=layer)
-
-    if client is not None:
-        response = client.get(url)
-        response.raise_for_status()
-        return response.json()
-
-    with httpx.Client() as local_client:
-        response = local_client.get(url)
-        response.raise_for_status()
-        return response.json()
+    return _get_json(url, client=client)
 
 
 def get_data_layer(
