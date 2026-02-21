@@ -1,4 +1,4 @@
-from boj_stat_search.url_builder import (
+from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
     build_metadata_api_url,

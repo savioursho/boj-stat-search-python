@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from boj_stat_search.api_request import (
+from boj_stat_search.api import (
     get_data_code,
     get_data_code_raw,
     get_data_layer,
@@ -9,7 +9,7 @@ from boj_stat_search.api_request import (
     get_metadata_raw,
 )
 from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
-from boj_stat_search.url_builder import (
+from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
     build_metadata_api_url,

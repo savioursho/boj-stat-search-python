@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 from typing import Any
 
+
 @dataclass(frozen=True)
 class DbInfo:
     name: str
     desc: str
     category: str
+
 
 @dataclass(frozen=True)
 class MetadataEntry:
@@ -48,4 +50,3 @@ class DataResponse(BaseResponse):
     parameter: dict[str, Any]
     next_position: int | None
     result_set: tuple[dict[str, Any], ...]
-

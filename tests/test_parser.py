@@ -1,5 +1,8 @@
 from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
-from boj_stat_search.parser import parse_data_code_response, parse_metadata_response
+from boj_stat_search.core.parser import (
+    parse_data_code_response,
+    parse_metadata_response,
+)
 
 
 def test_parse_metadata_response_parses_normal_payload():

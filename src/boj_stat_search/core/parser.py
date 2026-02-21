@@ -39,6 +39,7 @@ def parse_metadata_response(raw: dict[str, Any]) -> MetadataResponse:
         result_set=result_set,
     )
 
+
 def parse_data_code_response(raw: dict[str, Any]) -> DataResponse:
     parameter_raw = raw.get("PARAMETER", {})
     if isinstance(parameter_raw, dict):

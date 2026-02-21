@@ -10,19 +10,19 @@ API_PATH = {
     "getMetadata": f"/api/{VERSION}/getMetadata",
 }
 
-def build_metadata_api_url(
-    db: str
-) -> str:
+
+def build_metadata_api_url(db: str) -> str:
     query = urlencode({"db": db})
 
     split_result = SplitResult(
         scheme=SCHEME,
         netloc=NETLOC,
         path=API_PATH["getMetadata"],
-        query = query,
-        fragment = "",
+        query=query,
+        fragment="",
     )
     return urlunsplit(split_result)
+
 
 def build_data_code_api_url(
     db: str,
