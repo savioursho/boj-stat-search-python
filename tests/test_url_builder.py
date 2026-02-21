@@ -1,3 +1,5 @@
+import pytest
+
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -105,3 +107,23 @@ def test_build_data_layer_api_url_returns_expected_url_for_comma_layer():
         result
         == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=BP01&frequency=M&layer=1,1,1"
     )
+
+
+def test_build_data_code_api_url_raises_on_invalid_start_position():
+    with pytest.raises(ValueError, match="start_position"):
+        build_data_code_api_url(db="FM01", code="STRDCLUCON", start_position=0)
+
+
+def test_build_data_code_api_url_raises_on_invalid_date():
+    with pytest.raises(ValueError, match="start_date"):
+        build_data_code_api_url(db="FM01", code="STRDCLUCON", start_date="202513")
+
+
+def test_build_data_layer_api_url_raises_on_invalid_frequency():
+    with pytest.raises(ValueError, match="frequency"):
+        build_data_layer_api_url(db="MD10", frequency="X", layer="*")
+
+
+def test_build_data_layer_api_url_raises_on_invalid_layer():
+    with pytest.raises(ValueError, match="layer"):
+        build_data_layer_api_url(db="MD10", frequency="Q", layer="1,a")

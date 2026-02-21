@@ -1,5 +1,10 @@
 from urllib.parse import SplitResult, urlencode, urlunsplit
 
+from boj_stat_search.core.validator import (
+    validate_data_code_params,
+    validate_data_layer_params,
+)
+
 SCHEME = "https"
 NETLOC = "www.stat-search.boj.or.jp"
 VERSION = "v1"
@@ -31,6 +36,16 @@ def build_data_code_api_url(
     end_date: str | None = None,
     start_position: int | None = None,
 ) -> str:
+    validation_errors = validate_data_code_params(
+        db=db,
+        code=code,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+    )
+    if validation_errors:
+        raise ValueError(f"Invalid parameters: {'; '.join(validation_errors)}")
+
     query_params: dict[str, str | int] = {"db": db, "code": code}
     if start_date is not None:
         query_params["startDate"] = start_date
@@ -59,6 +74,17 @@ def build_data_layer_api_url(
     end_date: str | None = None,
     start_position: int | None = None,
 ) -> str:
+    validation_errors = validate_data_layer_params(
+        db=db,
+        frequency=frequency,
+        layer=layer,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+    )
+    if validation_errors:
+        raise ValueError(f"Invalid parameters: {'; '.join(validation_errors)}")
+
     query_params: dict[str, str | int] = {
         "db": db,
         "frequency": frequency,
