@@ -27,8 +27,19 @@ def build_metadata_api_url(db: str) -> str:
 def build_data_code_api_url(
     db: str,
     code: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    start_position: int | None = None,
 ) -> str:
-    query = urlencode({"db": db, "code": code}, safe=",")
+    query_params: dict[str, str | int] = {"db": db, "code": code}
+    if start_date is not None:
+        query_params["startDate"] = start_date
+    if end_date is not None:
+        query_params["endDate"] = end_date
+    if start_position is not None:
+        query_params["startPosition"] = start_position
+
+    query = urlencode(query_params, safe=",")
 
     split_result = SplitResult(
         scheme=SCHEME,

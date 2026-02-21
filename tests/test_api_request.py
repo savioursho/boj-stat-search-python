@@ -138,6 +138,47 @@ def test_get_data_code_raw_uses_client_and_returns_json():
     assert result == expected_payload
 
 
+def test_get_data_code_raw_with_optional_params_uses_client_and_returns_json():
+    db = "CO"
+    code = "TK99F1000601GCQ01000,TK99F2000601GCQ01000"
+    start_date = "202401"
+    end_date = "202504"
+    start_position = 160
+    expected_url = build_data_code_api_url(
+        db=db,
+        code=code,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+    )
+    expected_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(
+        db=db,
+        code=code,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+        client=client,
+    )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
 def test_get_data_code_uses_client_and_returns_parsed_response():
     db = "FM01"
     code = "STRDCLUCON"
@@ -196,6 +237,99 @@ def test_get_data_code_uses_client_and_returns_parsed_response():
             "STARTDATE": "",
             "ENDDATE": "",
             "STARTPOSITION": "",
+        },
+        next_position=None,
+        result_set=(
+            {
+                "SERIES_CODE": "STRDCLUCON",
+                "NAME_OF_TIME_SERIES": "Call Rate, Uncollateralized Overnight",
+                "UNIT": "percent per annum",
+                "FREQUENCY": "DAILY",
+                "CATEGORY": "Call Rate",
+                "LAST_UPDATE": 20260220,
+                "VALUES": {
+                    "SURVEY_DATES": [19980105, 19980106],
+                    "VALUES": [0.49, None],
+                },
+            },
+        ),
+    )
+
+
+def test_get_data_code_with_optional_params_uses_client_and_returns_parsed_response():
+    db = "FM01"
+    code = "STRDCLUCON"
+    start_date = "202501"
+    end_date = "202512"
+    start_position = 1
+    expected_url = build_data_code_api_url(
+        db=db,
+        code=code,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+    )
+    raw_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T15:58:56.071+09:00",
+        "PARAMETER": {
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": db,
+            "STARTDATE": start_date,
+            "ENDDATE": end_date,
+            "STARTPOSITION": str(start_position),
+        },
+        "NEXTPOSITION": None,
+        "RESULTSET": [
+            {
+                "SERIES_CODE": "STRDCLUCON",
+                "NAME_OF_TIME_SERIES": "Call Rate, Uncollateralized Overnight",
+                "UNIT": "percent per annum",
+                "FREQUENCY": "DAILY",
+                "CATEGORY": "Call Rate",
+                "LAST_UPDATE": 20260220,
+                "VALUES": {
+                    "SURVEY_DATES": [19980105, 19980106],
+                    "VALUES": [0.49, None],
+                },
+            }
+        ],
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = raw_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code(
+        db=db,
+        code=code,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+        client=client,
+    )
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == DataResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T15:58:56.071+09:00",
+        parameter={
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": db,
+            "STARTDATE": start_date,
+            "ENDDATE": end_date,
+            "STARTPOSITION": str(start_position),
         },
         next_position=None,
         result_set=(

@@ -36,16 +36,41 @@ def get_metadata(db: str, *, client: httpx.Client | None = None) -> MetadataResp
 
 
 def get_data_code_raw(
-    db: str, code: str, *, client: httpx.Client | None = None
+    db: str,
+    code: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    start_position: int | None = None,
+    *,
+    client: httpx.Client | None = None,
 ) -> dict[str, Any]:
-    url = build_data_code_api_url(db, code)
+    url = build_data_code_api_url(
+        db=db,
+        code=code,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+    )
     return _get_json(url, client=client)
 
 
 def get_data_code(
-    db: str, code: str, *, client: httpx.Client | None = None
+    db: str,
+    code: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    start_position: int | None = None,
+    *,
+    client: httpx.Client | None = None,
 ) -> DataResponse:
-    raw = get_data_code_raw(db=db, code=code, client=client)
+    raw = get_data_code_raw(
+        db=db,
+        code=code,
+        start_date=start_date,
+        end_date=end_date,
+        start_position=start_position,
+        client=client,
+    )
     return parse_data_code_response(raw)
 
 
