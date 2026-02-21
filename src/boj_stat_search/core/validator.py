@@ -1,11 +1,11 @@
 from typing import Any
 
-from boj_stat_search.core.database import _DB_CATALOG
+from boj_stat_search.core.database import list_db
 
 
 FORBIDDEN_CHARS = ("<", ">", '"', "”", "!", "|", "\\", ";", "'")
 ALLOWED_FREQUENCIES = {"CY", "FY", "CH", "FH", "Q", "M", "W", "D"}
-VALID_DB_NAMES = {db_info.name for db_info in _DB_CATALOG}
+VALID_DB_NAMES = {db_info.name for db_info in list_db()}
 
 
 def _check_common_text(
@@ -54,7 +54,7 @@ def _validate_db_name(db: Any) -> list[str]:
 
     assert isinstance(db, str)
     if db not in VALID_DB_NAMES:
-        return ["db: must be one of known DB names in _DB_CATALOG"]
+        return ["db: must be one of known DB names in list_db()"]
     return []
 
 

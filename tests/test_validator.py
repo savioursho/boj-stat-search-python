@@ -87,7 +87,7 @@ def test_validate_data_code_params_rejects_unknown_db():
         code="STRDCLUCON",
     )
 
-    assert _has_error(errors, "_DB_CATALOG")
+    assert _has_error(errors, "list_db()")
 
 
 def test_validate_data_layer_params_accepts_valid_q_dates():
@@ -175,4 +175,4 @@ def test_validate_data_layer_params_rejects_unknown_db():
         layer="*",
     )
 
-    assert _has_error(errors, "_DB_CATALOG")
+    assert _has_error(errors, "list_db()")

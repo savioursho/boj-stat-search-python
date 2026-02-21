@@ -130,12 +130,12 @@ def test_build_data_layer_api_url_raises_on_invalid_layer():
 
 
 def test_build_data_code_api_url_raises_on_unknown_db():
-    with pytest.raises(ValueError, match="_DB_CATALOG"):
+    with pytest.raises(ValueError, match="list_db\\(\\)"):
         build_data_code_api_url(db="UNKNOWN", code="STRDCLUCON")
 
 
 def test_build_data_layer_api_url_raises_on_unknown_db():
-    with pytest.raises(ValueError, match="_DB_CATALOG"):
+    with pytest.raises(ValueError, match="list_db\\(\\)"):
         build_data_layer_api_url(db="UNKNOWN", frequency="Q", layer="*")
 
 
