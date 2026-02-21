@@ -1,5 +1,5 @@
 import httpx
-from boj_stat_search.models import MetadataResponse, DataCodeResponse
+from boj_stat_search.models import DataResponse, MetadataResponse
 from boj_stat_search.parser import parse_data_code_response, parse_metadata_response
 from boj_stat_search.url_builder import (
     build_data_code_api_url,
@@ -38,7 +38,7 @@ def get_data_code_raw(db: str, code: str, *, client: httpx.Client | None = None)
         response.raise_for_status()
         return response.json()
 
-def get_data_code(db: str, code: str, *, client: httpx.Client | None = None) -> DataCodeResponse:
+def get_data_code(db: str, code: str, *, client: httpx.Client | None = None) -> DataResponse:
     raw = get_data_code_raw(db=db, code=code, client=client)
     return parse_data_code_response(raw)
 
@@ -69,7 +69,7 @@ def get_data_layer(
     layer: str,
     *,
     client: httpx.Client | None = None,
-) -> DataCodeResponse:
+) -> DataResponse:
     raw = get_data_layer_raw(
         db=db,
         frequency=frequency,

@@ -39,7 +39,7 @@ class MetadataResponse:
 
 
 @dataclass(frozen=True)
-class DataCodeResponse:
+class DataResponse:
     status: int
     message_id: str
     message: str

@@ -1,4 +1,4 @@
-from boj_stat_search.models import DataCodeResponse, MetadataEntry, MetadataResponse
+from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
 from boj_stat_search.parser import parse_data_code_response, parse_metadata_response
 
 
@@ -119,7 +119,7 @@ def test_parse_data_code_response_parses_normal_payload():
 
     result = parse_data_code_response(raw)
 
-    assert result == DataCodeResponse(
+    assert result == DataResponse(
         status=200,
         message_id="M181000I",
         message="ok",
@@ -160,7 +160,7 @@ def test_parse_data_code_response_handles_error_payload_with_missing_fields():
 
     result = parse_data_code_response(raw)
 
-    assert result == DataCodeResponse(
+    assert result == DataResponse(
         status=400,
         message_id="M181001E",
         message="Invalid input parameters",

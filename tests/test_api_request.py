@@ -8,7 +8,7 @@ from boj_stat_search.api_request import (
     get_metadata,
     get_metadata_raw,
 )
-from boj_stat_search.models import DataCodeResponse, MetadataEntry, MetadataResponse
+from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
 from boj_stat_search.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -184,7 +184,7 @@ def test_get_data_code_uses_client_and_returns_parsed_response():
     client.get.assert_called_once_with(expected_url)
     response.raise_for_status.assert_called_once_with()
     response.json.assert_called_once_with()
-    assert result == DataCodeResponse(
+    assert result == DataResponse(
         status=200,
         message_id="M181000I",
         message="ok",
@@ -302,7 +302,7 @@ def test_get_data_layer_uses_client_and_returns_parsed_response():
     client.get.assert_called_once_with(expected_url)
     response.raise_for_status.assert_called_once_with()
     response.json.assert_called_once_with()
-    assert result == DataCodeResponse(
+    assert result == DataResponse(
         status=200,
         message_id="M181000I",
         message="ok",
