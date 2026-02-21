@@ -1,5 +1,6 @@
 import pytest
 
+from boj_stat_search.core.types import Frequency
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -138,6 +139,28 @@ def test_build_data_layer_api_url_returns_expected_url_for_comma_layer():
     assert (
         result
         == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=BP01&frequency=M&layer=1,1,1"
+    )
+
+
+def test_build_data_layer_api_url_accepts_frequency_enum():
+    result = build_data_layer_api_url(
+        db="MD10",
+        frequency=Frequency.QUARTERLY,
+        layer="*",
+    )
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=MD10&frequency=Q&layer=*"
+    )
+
+
+def test_build_data_layer_api_url_normalizes_lowercase_frequency():
+    result = build_data_layer_api_url(db="MD10", frequency="q", layer="*")
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataLayer?db=MD10&frequency=Q&layer=*"
     )
 
 

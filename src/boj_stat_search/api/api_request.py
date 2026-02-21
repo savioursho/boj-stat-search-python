@@ -6,7 +6,7 @@ from boj_stat_search.core.parser import (
     parse_data_code_response,
     parse_metadata_response,
 )
-from boj_stat_search.core.types import ErrorMode
+from boj_stat_search.core.types import ErrorMode, Frequency
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -170,7 +170,7 @@ def get_data_code(
 
 def get_data_layer_raw(
     db: str,
-    frequency: str,
+    frequency: Frequency | str,
     layer: str,
     start_date: str | None = None,
     end_date: str | None = None,
@@ -193,7 +193,7 @@ def get_data_layer_raw(
 
 def get_data_layer(
     db: str,
-    frequency: str,
+    frequency: Frequency | str,
     layer: str,
     start_date: str | None = None,
     end_date: str | None = None,

@@ -1,11 +1,20 @@
 from typing import Any
 
 from boj_stat_search.core.database import list_db
+from boj_stat_search.core.types import Frequency
 
 
 FORBIDDEN_CHARS = ("<", ">", '"', "”", "!", "|", "\\", ";", "'")
-ALLOWED_FREQUENCIES = {"CY", "FY", "CH", "FH", "Q", "M", "W", "D"}
+ALLOWED_FREQUENCIES = {frequency.value for frequency in Frequency}
 VALID_DB_NAMES = {db_info.name for db_info in list_db()}
+
+
+def coerce_frequency(frequency: Any) -> Any:
+    if isinstance(frequency, Frequency):
+        return frequency.value
+    if isinstance(frequency, str):
+        return frequency.strip().upper()
+    return frequency
 
 
 def _check_common_text(
@@ -179,22 +188,22 @@ def validate_metadata_params(
 
 def validate_data_layer_params(
     db: str,
-    frequency: str,
+    frequency: Frequency | str,
     layer: str,
     start_date: str | None = None,
     end_date: str | None = None,
     start_position: int | None = None,
 ) -> list[str]:
+    normalized_frequency = coerce_frequency(frequency)
+
     errors: list[str] = []
     errors.extend(_validate_db_name(db))
-    errors.extend(_check_common_text("frequency", frequency, required=True))
+    errors.extend(_check_common_text("frequency", normalized_frequency, required=True))
     errors.extend(_check_common_text("layer", layer, required=True))
     errors.extend(_validate_start_position(start_position))
 
-    normalized_frequency = ""
     frequency_valid = False
-    if isinstance(frequency, str) and frequency != "":
-        normalized_frequency = frequency.upper()
+    if isinstance(normalized_frequency, str) and normalized_frequency != "":
         if normalized_frequency not in ALLOWED_FREQUENCIES:
             errors.append("frequency: must be one of CY, FY, CH, FH, Q, M, W, D")
         else:
@@ -219,14 +228,14 @@ def validate_data_layer_params(
         start_date_errors, start_date_valid = _validate_date_for_frequency(
             "start_date",
             start_date,
-            normalized_frequency,
+            str(normalized_frequency),
         )
         errors.extend(start_date_errors)
     if end_date is not None:
         end_date_errors, end_date_valid = _validate_date_for_frequency(
             "end_date",
             end_date,
-            normalized_frequency,
+            str(normalized_frequency),
         )
         errors.extend(end_date_errors)
 

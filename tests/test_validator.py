@@ -1,4 +1,6 @@
+from boj_stat_search.core.types import Frequency
 from boj_stat_search.core.validator import (
+    coerce_frequency,
     validate_data_code_params,
     validate_data_layer_params,
     validate_metadata_params,
@@ -177,6 +179,34 @@ def test_validate_data_layer_params_rejects_unknown_db():
     )
 
     assert _has_error(errors, "list_db()")
+
+
+def test_coerce_frequency_from_enum_returns_api_code():
+    assert coerce_frequency(Frequency.QUARTERLY) == "Q"
+
+
+def test_validate_data_layer_params_accepts_frequency_enum():
+    errors = validate_data_layer_params(
+        db="MD10",
+        frequency=Frequency.WEEKLY,
+        layer="*",
+        start_date="202501",
+        end_date="202512",
+    )
+
+    assert errors == []
+
+
+def test_validate_data_layer_params_normalizes_lowercase_frequency():
+    errors = validate_data_layer_params(
+        db="BP01",
+        frequency="q",
+        layer="1,1,1",
+        start_date="202401",
+        end_date="202404",
+    )
+
+    assert errors == []
 
 
 def test_validate_metadata_params_accepts_known_db():
