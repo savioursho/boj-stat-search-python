@@ -21,4 +21,6 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "marimo>=0.19.11",
+    "pytest>=9.0.2",
+    "ruff>=0.15.2",
 ]
