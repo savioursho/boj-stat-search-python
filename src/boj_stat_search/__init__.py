@@ -1,3 +1,4 @@
+from boj_stat_search.client import BojClient
 from boj_stat_search.api import (
     BojApiError,
     get_data_code,
@@ -18,6 +19,7 @@ from boj_stat_search.models import (
 )
 
 __all__ = [
+    "BojClient",
     "BojApiError",
     "get_metadata_raw",
     "get_metadata",

@@ -44,6 +44,7 @@ def test_top_level_re_exports_key_types_and_models():
 
 def test_top_level_has_expected_public_symbols():
     expected = {
+        "BojClient",
         "BojApiError",
         "get_metadata_raw",
         "get_metadata",
