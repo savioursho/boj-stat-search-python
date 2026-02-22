@@ -2,9 +2,19 @@
 
 Run one request successfully using only top-level imports.
 
-## 1. Prepare Environment
+## 1. Install
 
-In this repository:
+```bash
+pip install git+https://github.com/savioursho/boj-stat-search-python.git
+```
+
+or with uv:
+
+```bash
+uv add git+https://github.com/savioursho/boj-stat-search-python.git
+```
+
+For local development, clone the repository and run:
 
 ```bash
 uv sync
