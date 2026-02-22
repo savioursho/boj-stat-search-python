@@ -1,9 +1,10 @@
 # User Guide
 
-This guide explains how to use the `boj_stat_search` API for common tasks.
+This guide explains how to use `boj_stat_search` for common tasks.
 
-The package exposes two API styles:
+The package can be used in three ways:
 
+- **CLI** — the `boj-stat-search` command lets you query data directly from the terminal. JSON output is designed for piping to `jq` and other tools.
 - **Functional API** — top-level functions (`get_metadata`, `get_data_code`, `get_data_layer`). Simple and composable; no built-in throttling, so callers must manage delays manually for batch use.
 - **`BojClient`** — a stateful client that wraps the functional API. Reuses a single HTTP connection and enforces a configurable minimum delay between requests (default 1 s). Preferred for batch workflows.
 
@@ -18,6 +19,7 @@ The package exposes two API styles:
 1. [Getting Started](./getting_started.md)
 2. [Querying Data](./querying_data.md)
 3. [Layer Tree Display](./layer_tree_display.md)
+4. [Command-Line Interface](./cli.md)
 
 ## Coverage
 

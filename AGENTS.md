@@ -5,6 +5,7 @@
 - Main package: `src/boj_stat_search/`.
 - `core/`: pure functions and shared logic (`url_builder.py`, `validator.py`, `parser.py`, `types.py`, `database.py`).
 - `api/`: side-effect functions that call HTTP endpoints (`api_request.py`).
+- `cli/`: Typer-based CLI commands (`app.py`). Delegates to public API functions — no business logic.
 - `models/`: dataclasses and typed response objects.
 - Tests: `tests/` (`test_api_request.py`, `test_parser.py`, `test_url_builder.py`, `test_validator.py`).
 - Reference docs and experiments: `notes/` and `docs/` (not production code).
