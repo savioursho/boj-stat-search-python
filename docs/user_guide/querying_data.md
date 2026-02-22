@@ -122,6 +122,53 @@ with httpx.Client() as client:
         print(db_info.name, len(response.result_set))
 ```
 
+**Throttling note:** the functional API does not add any delay between requests. For batch loops, add `time.sleep()` manually to avoid overloading the server:
+
+```python
+import time
+
+import httpx
+from boj_stat_search import get_metadata, list_db
+
+with httpx.Client() as client:
+    for db_info in list_db():
+        response = get_metadata(db_info.name, client=client)
+        print(db_info.name, len(response.result_set))
+        time.sleep(1.0)
+```
+
+If you prefer not to manage throttling yourself, use [`BojClient`](#bojclient--throttling-and-connection-reuse) instead.
+
+## BojClient — Throttling and Connection Reuse
+
+`BojClient` is a stateful wrapper that handles both HTTP connection reuse and request throttling automatically. Use it as a drop-in replacement for the functional API in batch workflows.
+
+```python
+from boj_stat_search import BojClient, list_db
+
+with BojClient() as client:
+    for db_info in list_db():
+        response = client.get_metadata(db_info.name)
+        print(db_info.name, len(response.result_set))
+```
+
+By default, `BojClient` waits at least **1 second between consecutive requests**. Adjust with `min_request_interval`:
+
+```python
+BojClient(min_request_interval=2.0)  # wait at least 2 s between requests
+BojClient(min_request_interval=0)    # no throttling (use with care)
+```
+
+`BojClient` exposes the same three methods as the functional API — `get_metadata`, `get_data_code`, and `get_data_layer` — with identical signatures. The `on_validation_error` mode is configured once at construction:
+
+```python
+from boj_stat_search import BojClient
+
+with BojClient(on_validation_error="warn", min_request_interval=1.0) as client:
+    meta = client.get_metadata("BP01")
+    data = client.get_data_code("FM01", "STRDCLUCON", start_date="202501")
+```
+
 ## Parameter Helpers
 
 - `Frequency`: enum for valid frequency values
@@ -176,6 +223,7 @@ get_data_layer(
 ```python
 from boj_stat_search import (
     BojApiError,
+    BojClient,
     Frequency,
     Layer,
     Period,

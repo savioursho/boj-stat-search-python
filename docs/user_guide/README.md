@@ -1,6 +1,11 @@
 # User Guide
 
-This guide explains how to use the top-level `boj_stat_search` API for common tasks.
+This guide explains how to use the `boj_stat_search` API for common tasks.
+
+The package exposes two API styles:
+
+- **Functional API** — top-level functions (`get_metadata`, `get_data_code`, `get_data_layer`). Simple and composable; no built-in throttling, so callers must manage delays manually for batch use.
+- **`BojClient`** — a stateful client that wraps the functional API. Reuses a single HTTP connection and enforces a configurable minimum delay between requests (default 1 s). Preferred for batch workflows.
 
 ## Who This Is For
 
@@ -20,12 +25,13 @@ This guide explains how to use the top-level `boj_stat_search` API for common ta
   - `get_metadata`
   - `get_data_code`
   - `get_data_layer`
+  - `BojClient` (stateful client with built-in throttling)
   - `show_layers`
   - `list_db`
   - `Frequency`, `Layer`, `Period`
   - `BojApiError`
   - `DataResponse`, `MetadataResponse`, `DbInfo`
-  - Pagination, error handling, HTTP client reuse
+  - Pagination, error handling, HTTP client reuse, throttling
 - Not covered:
   - raw API variants (`get_*_raw`)
   - low-level URL builders, validators, and parsers

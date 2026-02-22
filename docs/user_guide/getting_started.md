@@ -38,6 +38,19 @@ print(len(metadata.result_set))
 - `db`: database name returned by the API
 - `result_set`: metadata entries
 
+## Two API Styles
+
+`boj_stat_search` provides two ways to make requests:
+
+|                       | Functional API                          | `BojClient`                                  |
+|-----------------------|-----------------------------------------|----------------------------------------------|
+| Import                | `from boj_stat_search import get_metadata` | `from boj_stat_search import BojClient`   |
+| HTTP connection reuse | Manual (`client=` kwarg)                | Automatic                                    |
+| Throttling            | Manual (`time.sleep`)                   | Automatic (default 1 s between requests)     |
+| Best for              | One-off calls                           | Batch workflows                              |
+
+The rest of this guide covers the functional API. For the stateful client, see [Querying Data — BojClient](./querying_data.md#bojclient--throttling-and-connection-reuse).
+
 ## Top-Level API Used Here
 
 ```python
