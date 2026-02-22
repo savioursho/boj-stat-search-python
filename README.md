@@ -43,6 +43,10 @@ metadata = get_metadata(db="BP01")
 show_layers(metadata.result_set, layer="1,1")
 ```
 
+## Documentation
+
+- [User Guide](./docs/user_guide/README.md)
+
 ## Official Resources
 
 - [API 公開についてのお知らせ (API Release Notice)](https://www.boj.or.jp/statistics/outline/notice_2026/not260218a.htm)
