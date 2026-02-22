@@ -158,6 +158,7 @@ def generate_metadata_csv_cmd(
         output_dir=output_dir,
         dbs=db,
         min_request_interval=min_request_interval,
+        show_progress=True,
     )
 
     for db_name in report.succeeded_dbs:

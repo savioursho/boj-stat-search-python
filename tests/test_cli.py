@@ -259,6 +259,7 @@ class TestGenerateMetadataCsv:
             output_dir="metadata",
             dbs=["FM01", "BP01"],
             min_request_interval=0.2,
+            show_progress=True,
         )
         assert "FM01: wrote 12 rows" in result.output
         assert "BP01: wrote 34 rows" in result.output
@@ -278,6 +279,7 @@ class TestGenerateMetadataCsv:
             output_dir="metadata",
             dbs=None,
             min_request_interval=1.0,
+            show_progress=True,
         )
         assert "FM01: wrote 12 rows" in result.output
         assert (

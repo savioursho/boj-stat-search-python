@@ -127,6 +127,7 @@ boj-stat-search generate-metadata-csv
 ```
 
 Fetches metadata for all known DBs and writes one file per DB under `metadata/`:
+The command shows a live `tqdm` progress bar while DBs are being processed.
 
 ```text
 metadata/FM01.csv

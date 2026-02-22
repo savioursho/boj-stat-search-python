@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 
+from tqdm import tqdm
+
 from boj_stat_search.client import BojClient
 from boj_stat_search.core import list_db
 from boj_stat_search.models import MetadataEntry
@@ -130,6 +132,8 @@ def generate_metadata_csvs(
     output_dir: str | Path = "metadata",
     dbs: Sequence[str] | None = None,
     min_request_interval: float = 1.0,
+    *,
+    show_progress: bool = False,
 ) -> MetadataExportReport:
     output_dir_path = Path(output_dir)
     requested_dbs = _resolve_dbs(dbs)
@@ -138,18 +142,31 @@ def generate_metadata_csvs(
     row_counts: dict[str, int] = {}
     error_messages: dict[str, str] = {}
 
-    with BojClient(min_request_interval=min_request_interval) as client:
-        for db in requested_dbs:
-            try:
-                metadata = client.get_metadata(db)
-                rows = metadata_entries_to_rows(db, metadata.result_set)
-                write_metadata_csv(output_dir_path / f"{db}.csv", rows)
-            except Exception as exc:
-                error_messages[db] = str(exc)
-                continue
+    progress = tqdm(
+        total=len(requested_dbs),
+        desc="Generating metadata CSV",
+        unit="db",
+        disable=not show_progress,
+    )
+    try:
+        with BojClient(min_request_interval=min_request_interval) as client:
+            for db in requested_dbs:
+                try:
+                    metadata = client.get_metadata(db)
+                    rows = metadata_entries_to_rows(db, metadata.result_set)
+                    write_metadata_csv(output_dir_path / f"{db}.csv", rows)
+                except Exception as exc:
+                    error_messages[db] = str(exc)
+                    progress.set_postfix_str(f"{db}: failed")
+                    progress.update(1)
+                    continue
 
-            succeeded_dbs.append(db)
-            row_counts[db] = len(rows)
+                succeeded_dbs.append(db)
+                row_counts[db] = len(rows)
+                progress.set_postfix_str(f"{db}: {len(rows)} rows")
+                progress.update(1)
+    finally:
+        progress.close()
 
     failed_dbs = tuple(db for db in requested_dbs if db in error_messages)
 

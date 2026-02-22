@@ -240,3 +240,63 @@ def test_generate_metadata_csvs_continues_on_failures_and_reports_them(
 
     assert (output_dir / "FM01.csv").exists()
     assert not (output_dir / "BP01.csv").exists()
+
+
+def test_generate_metadata_csvs_uses_tqdm_when_show_progress_enabled(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    responses: dict[str, Any] = {
+        "FM01": _make_metadata_response("FM01", (_make_entry("STRDCLUCON"),)),
+        "BP01": _make_metadata_response("BP01", (_make_entry("CODE1"),)),
+    }
+
+    def fake_client_factory(*, min_request_interval: float) -> _FakeClient:
+        return _FakeClient(responses, min_request_interval=min_request_interval)
+
+    created: dict[str, Any] = {}
+
+    class _FakeProgress:
+        def __init__(self, *, total: int, desc: str, unit: str, disable: bool) -> None:
+            self.total = total
+            self.desc = desc
+            self.unit = unit
+            self.disable = disable
+            self.updated = 0
+            self.closed = False
+            self.postfixes: list[str] = []
+
+        def set_postfix_str(self, value: str) -> None:
+            self.postfixes.append(value)
+
+        def update(self, step: int) -> None:
+            self.updated += step
+
+        def close(self) -> None:
+            self.closed = True
+
+    def fake_tqdm(*, total: int, desc: str, unit: str, disable: bool) -> _FakeProgress:
+        progress = _FakeProgress(total=total, desc=desc, unit=unit, disable=disable)
+        created["progress"] = progress
+        return progress
+
+    monkeypatch.setattr(
+        "boj_stat_search.catalog.exporter.BojClient", fake_client_factory
+    )
+    monkeypatch.setattr("boj_stat_search.catalog.exporter.tqdm", fake_tqdm)
+
+    report = generate_metadata_csvs(
+        output_dir=tmp_path / "metadata",
+        dbs=["FM01", "BP01"],
+        show_progress=True,
+    )
+
+    progress = created["progress"]
+    assert progress.total == 2
+    assert progress.desc == "Generating metadata CSV"
+    assert progress.unit == "db"
+    assert progress.disable is False
+    assert progress.updated == 2
+    assert progress.closed is True
+    assert progress.postfixes[-1] == "BP01: 1 rows"
+    assert report.is_success is True
