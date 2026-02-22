@@ -35,11 +35,17 @@ git checkout -b release/vX.Y.Z
 
 ### 2. Bump the version
 
-Update the `version` field in `pyproject.toml`:
+Use the `uv version` command to bump the version. This updates both `pyproject.toml` and `uv.lock` automatically.
 
-```toml
-[project]
-version = "X.Y.Z"
+```bash
+# Bump minor version (e.g. 0.1.0 → 0.2.0)
+uv version --bump minor
+
+# Bump patch version (e.g. 0.2.0 → 0.2.1)
+uv version --bump patch
+
+# Bump major version (e.g. 0.2.0 → 1.0.0)
+uv version --bump major
 ```
 
 ### 3. Run pre-merge checks
