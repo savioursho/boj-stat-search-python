@@ -43,6 +43,11 @@ metadata = get_metadata(db="BP01")
 show_layers(metadata.result_set, layer="1,1")
 ```
 
+```bash
+# Generate per-DB metadata Parquet files locally
+boj-stat-search generate-metadata-parquet --output-dir metadata
+```
+
 ## Documentation
 
 - [User Guide](./docs/user_guide/README.md)
