@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, Mock, patch
 
 import httpx
-import pytest
 
 from boj_stat_search import BojClient
 from boj_stat_search.models import DataResponse, MetadataResponse
@@ -200,6 +199,85 @@ def test_get_data_layer_delegates_all_optional_args():
         "BP01", "M", "1,1,1", "202504", "202509", 255, "raise", client=c._client
     )
     assert result is expected
+
+
+# ---------------------------------------------------------------------------
+# Throttling
+# ---------------------------------------------------------------------------
+
+
+def test_throttle_sleeps_when_interval_not_elapsed():
+    """Only 0.3 s elapsed; with min_request_interval=1.0 expects ~0.7 s sleep."""
+    with patch("boj_stat_search.client.time") as mock_time:
+        # First monotonic() → _last_request_time init is 0.0 (not called yet)
+        # _throttle: elapsed = monotonic() - 0.0; then sleep; then monotonic() again
+        mock_time.monotonic.side_effect = [
+            0.3,
+            1.0,
+        ]  # elapsed=0.3, then post-sleep stamp
+        mock_time.sleep = MagicMock()
+
+        c = BojClient(min_request_interval=1.0)
+        c._throttle()
+
+        mock_time.sleep.assert_called_once()
+        sleep_arg = mock_time.sleep.call_args[0][0]
+        assert abs(sleep_arg - 0.7) < 1e-9
+
+
+def test_throttle_does_not_sleep_when_interval_elapsed():
+    """More than 1.0 s elapsed → no sleep."""
+    with patch("boj_stat_search.client.time") as mock_time:
+        mock_time.monotonic.side_effect = [1.5, 1.5]  # elapsed=1.5, update stamp
+        mock_time.sleep = MagicMock()
+
+        c = BojClient(min_request_interval=1.0)
+        c._throttle()
+
+        mock_time.sleep.assert_not_called()
+
+
+def test_throttle_disabled_when_zero():
+    """min_request_interval=0 → no sleep regardless of elapsed time."""
+    with patch("boj_stat_search.client.time") as mock_time:
+        mock_time.sleep = MagicMock()
+
+        c = BojClient(min_request_interval=0)
+        c._throttle()
+
+        mock_time.sleep.assert_not_called()
+        mock_time.monotonic.assert_not_called()
+
+
+def test_throttle_updates_last_request_time():
+    """After _throttle(), _last_request_time is set to the second monotonic() call."""
+    with patch("boj_stat_search.client.time") as mock_time:
+        mock_time.monotonic.side_effect = [2.0, 3.5]
+        mock_time.sleep = MagicMock()
+
+        c = BojClient(min_request_interval=1.0)
+        c._throttle()
+
+        assert c._last_request_time == 3.5
+
+
+def test_throttle_applied_to_all_methods():
+    """_throttle is called once per API method invocation."""
+    meta = _make_metadata_response()
+    data = _make_data_response()
+
+    with (
+        patch("boj_stat_search.client.get_metadata", return_value=meta),
+        patch("boj_stat_search.client.get_data_code", return_value=data),
+        patch("boj_stat_search.client.get_data_layer", return_value=data),
+    ):
+        c = BojClient(min_request_interval=0)  # disable real sleeping
+        with patch.object(c, "_throttle") as mock_throttle:
+            c.get_metadata("IR01")
+            c.get_data_code("FM01", "CODE")
+            c.get_data_layer("MD10", "Q", "*")
+
+        assert mock_throttle.call_count == 3
 
 
 # ---------------------------------------------------------------------------

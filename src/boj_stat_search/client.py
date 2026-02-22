@@ -1,3 +1,5 @@
+import time
+
 import httpx
 
 from boj_stat_search.api.api_request import get_data_code, get_data_layer, get_metadata
@@ -13,10 +15,13 @@ class BojClient:
         *,
         client: httpx.Client | None = None,
         on_validation_error: ErrorMode = "raise",
+        min_request_interval: float = 1.0,
     ) -> None:
         self._external_client = client is not None
         self._client = client if client is not None else httpx.Client()
         self.on_validation_error = on_validation_error
+        self.min_request_interval = min_request_interval
+        self._last_request_time: float = 0.0
 
     # --- context manager ---
 
@@ -31,9 +36,21 @@ class BojClient:
         if not self._external_client:
             self._client.close()
 
+    # --- throttling ---
+
+    def _throttle(self) -> None:
+        if self.min_request_interval <= 0:
+            return
+        elapsed = time.monotonic() - self._last_request_time
+        wait = self.min_request_interval - elapsed
+        if wait > 0:
+            time.sleep(wait)
+        self._last_request_time = time.monotonic()
+
     # --- API methods ---
 
     def get_metadata(self, db: str) -> MetadataResponse:
+        self._throttle()
         return get_metadata(db, self.on_validation_error, client=self._client)
 
     def get_data_code(
@@ -44,6 +61,7 @@ class BojClient:
         end_date: Period | str | None = None,
         start_position: int | None = None,
     ) -> DataResponse:
+        self._throttle()
         return get_data_code(
             db,
             code,
@@ -63,6 +81,7 @@ class BojClient:
         end_date: Period | str | None = None,
         start_position: int | None = None,
     ) -> DataResponse:
+        self._throttle()
         return get_data_layer(
             db,
             frequency,
