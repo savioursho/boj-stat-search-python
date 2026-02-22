@@ -2,6 +2,18 @@
 
 Python client for the Bank of Japan Stat-Search API.
 
+## Installation
+
+```bash
+pip install git+https://github.com/savioursho/boj-stat-search-python.git
+```
+
+or with uv:
+
+```bash
+uv add git+https://github.com/savioursho/boj-stat-search-python.git
+```
+
 ## Quick Start
 
 ```python
