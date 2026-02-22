@@ -89,3 +89,13 @@ This project follows [Semantic Versioning](https://semver.org/):
 - **MAJOR** — incompatible API changes.
 - **MINOR** — new functionality in a backwards-compatible manner.
 - **PATCH** — backwards-compatible bug fixes.
+
+## Metadata Compliance
+
+When metadata files are updated or newly distributed, follow:
+
+- `docs/development_guide/metadata_licensing.md`
+- `metadata/NOTICE.md`
+
+In particular, keep source attribution in place and re-check BOJ terms before
+changing metadata distribution behavior.
