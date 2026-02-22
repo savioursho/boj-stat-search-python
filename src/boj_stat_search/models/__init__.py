@@ -32,6 +32,29 @@ class MetadataEntry:
 
 
 @dataclass(frozen=True)
+class SeriesCatalogEntry:
+    db: str
+    series_code: str
+    name_j: str
+    name_en: str
+    unit_j: str
+    unit_en: str
+    frequency: str
+    category_j: str
+    category_en: str
+    layer1: int
+    layer2: int
+    layer3: int
+    layer4: int
+    layer5: int
+    start_of_time_series: str
+    end_of_time_series: str
+    last_update: str
+    notes_j: str
+    notes_en: str
+
+
+@dataclass(frozen=True)
 class BaseResponse:
     status: int
     message_id: str

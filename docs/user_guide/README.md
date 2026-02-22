@@ -5,7 +5,7 @@ This guide explains how to use `boj_stat_search` for common tasks.
 The package can be used in three ways:
 
 - **CLI** — the `boj-stat-search` command lets you query data directly from the terminal. JSON output is designed for piping to `jq` and other tools.
-- **Functional API** — top-level functions (`get_metadata`, `get_data_code`, `get_data_layer`, `generate_metadata_parquet_files`). Simple and composable; no built-in throttling, so callers must manage delays manually for batch use.
+- **Functional API** — top-level functions (`get_metadata`, `get_data_code`, `get_data_layer`, `generate_metadata_parquet_files`, `load_catalog_db`, `load_catalog_all`, `list_series`, `search_series`). Simple and composable; no built-in throttling, so callers must manage delays manually for batch use.
 - **`BojClient`** — a stateful client that wraps the functional API. Reuses a single HTTP connection and enforces a configurable minimum delay between requests (default 1 s). Preferred for batch workflows.
 
 ## Who This Is For
@@ -28,6 +28,10 @@ The package can be used in three ways:
   - `get_data_code`
   - `get_data_layer`
   - `generate_metadata_parquet_files`
+  - `load_catalog_db`
+  - `load_catalog_all`
+  - `list_series`
+  - `search_series`
   - `BojClient` (stateful client with built-in throttling)
   - `show_layers`
   - `list_db`
