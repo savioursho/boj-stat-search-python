@@ -1,8 +1,11 @@
 import json
+from pathlib import Path
+from types import MappingProxyType
 from unittest.mock import patch
 
 from typer.testing import CliRunner
 
+from boj_stat_search.catalog import MetadataExportReport
 from boj_stat_search.cli.app import app
 from boj_stat_search.models import (
     DataResponse,
@@ -60,6 +63,24 @@ _FAKE_DATA_RESPONSE = DataResponse(
     parameter={"db": "FM01"},
     next_position=None,
     result_set=({"date": "20250221", "value": "0.227"},),
+)
+
+_FAKE_EXPORT_REPORT_SUCCESS = MetadataExportReport(
+    output_dir=Path("metadata"),
+    requested_dbs=("FM01", "BP01"),
+    succeeded_dbs=("FM01", "BP01"),
+    failed_dbs=(),
+    row_counts=MappingProxyType({"FM01": 12, "BP01": 34}),
+    error_messages=MappingProxyType({}),
+)
+
+_FAKE_EXPORT_REPORT_FAILURE = MetadataExportReport(
+    output_dir=Path("metadata"),
+    requested_dbs=("FM01", "BP01"),
+    succeeded_dbs=("FM01",),
+    failed_dbs=("BP01",),
+    row_counts=MappingProxyType({"FM01": 12}),
+    error_messages=MappingProxyType({"BP01": "boom"}),
 )
 
 
@@ -210,3 +231,56 @@ class TestGetDataLayer:
     def test_missing_required_args(self) -> None:
         result = runner.invoke(app, ["get-data-layer", "FM01", "D"])
         assert result.exit_code != 0
+
+
+class TestGenerateMetadataCsv:
+    def test_success(self) -> None:
+        with patch(
+            "boj_stat_search.cli.app.generate_metadata_csvs",
+            return_value=_FAKE_EXPORT_REPORT_SUCCESS,
+        ) as mock_fn:
+            result = runner.invoke(
+                app,
+                [
+                    "generate-metadata-csv",
+                    "--output-dir",
+                    "metadata",
+                    "--db",
+                    "FM01",
+                    "--db",
+                    "BP01",
+                    "--min-request-interval",
+                    "0.2",
+                ],
+            )
+
+        assert result.exit_code == 0
+        mock_fn.assert_called_once_with(
+            output_dir="metadata",
+            dbs=["FM01", "BP01"],
+            min_request_interval=0.2,
+        )
+        assert "FM01: wrote 12 rows" in result.output
+        assert "BP01: wrote 34 rows" in result.output
+        assert (
+            "Metadata export completed successfully (2/2 succeeded)." in result.output
+        )
+
+    def test_failure_exits_non_zero(self) -> None:
+        with patch(
+            "boj_stat_search.cli.app.generate_metadata_csvs",
+            return_value=_FAKE_EXPORT_REPORT_FAILURE,
+        ) as mock_fn:
+            result = runner.invoke(app, ["generate-metadata-csv"])
+
+        assert result.exit_code == 1
+        mock_fn.assert_called_once_with(
+            output_dir="metadata",
+            dbs=None,
+            min_request_interval=1.0,
+        )
+        assert "FM01: wrote 12 rows" in result.output
+        assert (
+            "Metadata export completed with failures (1/2 succeeded)." in result.output
+        )
+        assert "BP01: boom" in result.output

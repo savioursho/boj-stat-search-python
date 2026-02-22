@@ -5,6 +5,7 @@ from typing import Annotated, Optional
 import typer
 
 from boj_stat_search.api import BojApiError, get_data_code, get_data_layer, get_metadata
+from boj_stat_search.catalog import generate_metadata_csvs
 from boj_stat_search.core import list_db
 from boj_stat_search.display import show_layers
 
@@ -125,6 +126,59 @@ def get_data_layer_cmd(
         raise typer.Exit(code=1) from exc
 
     typer.echo(json.dumps(asdict(result), ensure_ascii=False, indent=2))
+
+
+@app.command("generate-metadata-csv")
+def generate_metadata_csv_cmd(
+    output_dir: Annotated[
+        str,
+        typer.Option(
+            "--output-dir",
+            "-o",
+            help="Directory where per-DB metadata CSV files will be written",
+        ),
+    ] = "metadata",
+    db: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--db",
+            help="Database code to export (repeat option to select multiple DBs)",
+        ),
+    ] = None,
+    min_request_interval: Annotated[
+        float,
+        typer.Option(
+            "--min-request-interval",
+            help="Minimum delay in seconds between BOJ API requests",
+        ),
+    ] = 1.0,
+) -> None:
+    """Generate per-DB metadata CSV files."""
+    report = generate_metadata_csvs(
+        output_dir=output_dir,
+        dbs=db,
+        min_request_interval=min_request_interval,
+    )
+
+    for db_name in report.succeeded_dbs:
+        row_count = report.row_counts[db_name]
+        typer.echo(f"{db_name}: wrote {row_count} rows")
+
+    if report.failed_count > 0:
+        typer.echo(
+            f"Metadata export completed with failures "
+            f"({report.succeeded_count}/{report.total_dbs} succeeded).",
+            err=True,
+        )
+        for db_name in report.failed_dbs:
+            message = report.error_messages[db_name]
+            typer.echo(f"{db_name}: {message}", err=True)
+        raise typer.Exit(code=1)
+
+    typer.echo(
+        f"Metadata export completed successfully "
+        f"({report.succeeded_count}/{report.total_dbs} succeeded)."
+    )
 
 
 if __name__ == "__main__":
