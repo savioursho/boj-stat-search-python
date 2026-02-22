@@ -9,6 +9,10 @@ from boj_stat_search.api import (
     get_metadata as api_get_metadata,
     get_metadata_raw as api_get_metadata_raw,
 )
+from boj_stat_search.catalog import (
+    MetadataExportReport as CatalogMetadataExportReport,
+    generate_metadata_csvs as catalog_generate_metadata_csvs,
+)
 from boj_stat_search.core import Frequency as CoreFrequency
 from boj_stat_search.core import Layer as CoreLayer
 from boj_stat_search.core import Period as CorePeriod
@@ -29,6 +33,7 @@ def test_top_level_re_exports_functional_api():
     assert bss.get_data_code is api_get_data_code
     assert bss.get_data_layer_raw is api_get_data_layer_raw
     assert bss.get_data_layer is api_get_data_layer
+    assert bss.generate_metadata_csvs is catalog_generate_metadata_csvs
     assert bss.show_layers is display_show_layers
 
 
@@ -36,6 +41,7 @@ def test_top_level_re_exports_key_types_and_models():
     assert bss.Frequency is CoreFrequency
     assert bss.Layer is CoreLayer
     assert bss.Period is CorePeriod
+    assert bss.MetadataExportReport is CatalogMetadataExportReport
     assert bss.BaseResponse is ModelsBaseResponse
     assert bss.MetadataEntry is ModelsMetadataEntry
     assert bss.MetadataResponse is ModelsMetadataResponse
@@ -52,9 +58,11 @@ def test_top_level_has_expected_public_symbols():
         "get_data_code",
         "get_data_layer_raw",
         "get_data_layer",
+        "generate_metadata_csvs",
         "Frequency",
         "Layer",
         "Period",
+        "MetadataExportReport",
         "BaseResponse",
         "DbInfo",
         "MetadataEntry",

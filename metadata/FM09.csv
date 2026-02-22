@@ -1,0 +1,5 @@
+db,series_code,name_j,name_en,unit_j,unit_en,frequency,category_j,category_en,layer1,layer2,layer3,layer4,layer5,start_of_time_series,end_of_time_series,last_update
+FM09,FX180110001,名目実効為替レート指数,Nominal Effective Exchange Rate,２０２０年＝１００,CY 2020=100,MONTHLY,実効為替レート,Effective Exchange Rate,1,1,0,0,0,197001,202512,20260126
+FM09,FX180110002,実質実効為替レート指数,Real Effective Exchange Rate,２０２０年＝１００,CY 2020=100,MONTHLY,実効為替レート,Effective Exchange Rate,1,2,0,0,0,197001,202512,20260126
+FM09,FXCP7JP,（更新停止）名目実効為替レート指数（2010年1月まで）,(Discontinued)Nominal/Effective Exchange Rates (through January 2010),１９７３年３月＝１００,March 1973=100,MONTHLY,実効為替レート,Effective Exchange Rate,1,3,0,0,0,197001,201001,20171229
+FM09,FXCP8JP,（更新停止）実質実効為替レート指数（2010年1月まで）,(Discontinued)Real/Effective Exchange Rates (through January 2010),１９７３年３月＝１００,March 1973=100,MONTHLY,実効為替レート,Effective Exchange Rate,1,4,0,0,0,197001,201001,20171229

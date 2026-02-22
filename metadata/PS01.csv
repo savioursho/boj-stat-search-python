@@ -1,0 +1,10 @@
+db,series_code,name_j,name_en,unit_j,unit_en,frequency,category_j,category_en,layer1,layer2,layer3,layer4,layer5,start_of_time_series,end_of_time_series,last_update
+PS01,PMRA3,日本銀行当座預金決済額（ａ）/件数,Settlement via BOJ Accounts (a)/Number of Transactions,千件,thousand cases,MONTHLY,各種決済,Other Payment and Settlement Systems,1,1,0,0,0,199007,202601,20260203
+PS01,PMRA4,日本銀行当座預金決済額（ａ）/金額,Settlement via BOJ Accounts (a)/Value,十億円,billion yen,MONTHLY,各種決済,Other Payment and Settlement Systems,1,2,0,0,0,199007,202601,20260203
+PS01,PMRA2,日本銀行当座預金決済額（ａ）/金額/1日平均,Settlement via BOJ Accounts (a)/Value/Daily Average,十億円,billion yen,MONTHLY,各種決済,Other Payment and Settlement Systems,1,3,0,0,0,199007,202601,20260203
+PS01,PMRA@01,国債振替決済口座振替（ｂ）（ｃ）/件数,JGB Book-entry System (b)(c)/Number of Transactions,千件,thousand cases,MONTHLY,各種決済,Other Payment and Settlement Systems,1,4,0,0,0,199005,202601,20260203
+PS01,PMRA@02,国債振替決済口座振替（ｂ）（ｃ）/金額,JGB Book-entry System (b)(c)/Value,十億円,billion yen,MONTHLY,各種決済,Other Payment and Settlement Systems,1,5,0,0,0,199005,202601,20260203
+PS01,PMRA@03,国債振替決済口座振替（ｂ）（ｃ）/金額/1日平均,JGB Book-entry System (b)(c)/Value/Daily Average,十億円,billion yen,MONTHLY,各種決済,Other Payment and Settlement Systems,1,6,0,0,0,199005,202601,20260203
+PS01,PMRA@04,（更新停止）国債移転登録（ｂ）（ｄ）/件数,(discontinued) JGB Registration System (b)(d)/Number of Transactions,千件,thousand cases,MONTHLY,各種決済,Other Payment and Settlement Systems,1,7,0,0,0,197504,201510,20171229
+PS01,PMRA@05,（更新停止）国債移転登録（ｂ）（ｄ）/金額,(discontinued) JGB Registration System (b)(d)/Value,十億円,billion yen,MONTHLY,各種決済,Other Payment and Settlement Systems,1,8,0,0,0,198501,201510,20171229
+PS01,PMRA@06,（更新停止）国債移転登録（ｂ）（ｄ）/金額/1日平均,(discontinued) JGB Registration System (b)(d)/Value/Daily Average,十億円,billion yen,MONTHLY,各種決済,Other Payment and Settlement Systems,1,9,0,0,0,198501,201510,20171229

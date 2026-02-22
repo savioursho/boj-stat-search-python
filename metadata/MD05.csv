@@ -1,0 +1,21 @@
+db,series_code,name_j,name_en,unit_j,unit_en,frequency,category_j,category_en,layer1,layer2,layer3,layer4,layer5,start_of_time_series,end_of_time_series,last_update
+MD05,MACCV1,流通高,Circulation,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,1,0,0,0,195301,202601,20260206
+MD05,MACCV2,日本銀行券発行高,Banknotes in Circulation,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,2,0,0,0,195301,202601,20260206
+MD05,MACCV2@01,日本銀行券発行高/うち一万円,"Banknotes in Circulation/10,000 Yen",億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,3,0,0,0,198205,202601,20260206
+MD05,MACCV2@02,日本銀行券発行高/うち五千円,"Banknotes in Circulation/5,000 Yen",億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,4,0,0,0,198205,202601,20260206
+MD05,MACCV201D5,日本銀行券発行高/うち二千円,"Banknotes in Circulation/2,000 Yen",億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,5,0,0,0,200007,202601,20260206
+MD05,MACCV2@03,日本銀行券発行高/うち千円,"Banknotes in Circulation/1,000 Yen",億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,6,0,0,0,198205,202601,20260206
+MD05,MACCV2@05,日本銀行券発行高/うち五百円,Banknotes in Circulation/500 Yen,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,7,0,0,0,198205,202601,20260206
+MD05,MACCV301,貨幣流通高（ａ）,Coins in Circulation(a),億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,8,0,0,0,197101,202601,20260206
+MD05,MACCV3016,貨幣流通高（ａ）/うち五百円,Coins in Circulation(a)/500 Yen,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,9,0,0,0,198204,202601,20260206
+MD05,MACCV3015,貨幣流通高（ａ）/うち百円,Coins in Circulation(a)/100 Yen,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,10,0,0,0,197101,202601,20260206
+MD05,MACCV3014,貨幣流通高（ａ）/うち五十円,Coins in Circulation(a)/50 Yen,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,11,0,0,0,197101,202601,20260206
+MD05,MACCV3013,貨幣流通高（ａ）/うち十円,Coins in Circulation(a)/10 Yen,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,12,0,0,0,197101,202601,20260206
+MD05,MACCV3012,貨幣流通高（ａ）/うち五円,Coins in Circulation(a)/5 Yen,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,13,0,0,0,197101,202601,20260206
+MD05,MACCV3011,貨幣流通高（ａ）/うち一円,Coins in Circulation(a)/1 Yen,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,1,14,0,0,0,197101,202601,20260206
+MD05,MACCV201,月末発行高,Outstanding(End of Month),億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,2,1,0,0,0,195301,202601,20260206
+MD05,MACCV201AX12,月末発行高（季調済）,Outstanding(End of Month)/Seasonally Adjusted,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,2,2,0,0,0,195501,202601,20260206
+MD05,MACCV202,平均発行高,Outstanding(Average),億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,2,3,0,0,0,195301,202601,20260206
+MD05,MACCV202AX12,平均発行高（季調済）,Outstanding(Average)/Seasonally Adjusted,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,2,4,0,0,0,195501,202601,20260206
+MD05,MACCV203,最高発行高,High of Month,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,2,5,0,0,0,195301,202601,20260206
+MD05,MACCV204,最低発行高,Low of Month,億円,100 million yen,MONTHLY,通貨流通高,Currency in Circulation,2,6,0,0,0,195301,202601,20260206
