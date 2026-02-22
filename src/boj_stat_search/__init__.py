@@ -41,4 +41,6 @@ __all__ = [
 
 
 def main() -> None:
-    print("Hello from boj-stat-search!")
+    from boj_stat_search.cli.app import app
+
+    app()
