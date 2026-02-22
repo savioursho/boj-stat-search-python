@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-import csv
 import tempfile
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 
+import pyarrow as pa
+import pyarrow.parquet as pq
 from tqdm import tqdm
 
 from boj_stat_search.client import BojClient
 from boj_stat_search.core import list_db
 from boj_stat_search.models import MetadataEntry
 
-METADATA_CSV_COLUMNS: tuple[str, ...] = (
-    "db",
+METADATA_PARQUET_COLUMNS: tuple[str, ...] = (
     "series_code",
     "name_j",
     "name_en",
@@ -31,6 +31,31 @@ METADATA_CSV_COLUMNS: tuple[str, ...] = (
     "start_of_time_series",
     "end_of_time_series",
     "last_update",
+    "notes_j",
+    "notes_en",
+)
+
+METADATA_PARQUET_SCHEMA = pa.schema(
+    [
+        pa.field("series_code", pa.string()),
+        pa.field("name_j", pa.string()),
+        pa.field("name_en", pa.string()),
+        pa.field("unit_j", pa.string()),
+        pa.field("unit_en", pa.string()),
+        pa.field("frequency", pa.string()),
+        pa.field("category_j", pa.string()),
+        pa.field("category_en", pa.string()),
+        pa.field("layer1", pa.int64()),
+        pa.field("layer2", pa.int64()),
+        pa.field("layer3", pa.int64()),
+        pa.field("layer4", pa.int64()),
+        pa.field("layer5", pa.int64()),
+        pa.field("start_of_time_series", pa.string()),
+        pa.field("end_of_time_series", pa.string()),
+        pa.field("last_update", pa.string()),
+        pa.field("notes_j", pa.string()),
+        pa.field("notes_en", pa.string()),
+    ]
 )
 
 
@@ -72,7 +97,6 @@ def metadata_entries_to_rows(
 
         rows.append(
             {
-                "db": db,
                 "series_code": entry.series_code,
                 "name_j": entry.name_of_time_series_j,
                 "name_en": entry.name_of_time_series,
@@ -89,13 +113,15 @@ def metadata_entries_to_rows(
                 "start_of_time_series": entry.start_of_the_time_series,
                 "end_of_time_series": entry.end_of_the_time_series,
                 "last_update": entry.last_update,
+                "notes_j": entry.notes_j,
+                "notes_en": entry.notes,
             }
         )
 
     return rows
 
 
-def write_metadata_csv(
+def write_metadata_parquet(
     file_path: str | Path,
     rows: Sequence[Mapping[str, str | int]],
 ) -> None:
@@ -105,21 +131,18 @@ def write_metadata_csv(
     temp_path: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8",
-            newline="",
+            mode="wb",
             dir=path.parent,
             prefix=f".{path.name}.",
             suffix=".tmp",
             delete=False,
         ) as temp_file:
             temp_path = Path(temp_file.name)
-            writer = csv.DictWriter(temp_file, fieldnames=list(METADATA_CSV_COLUMNS))
-            writer.writeheader()
-            writer.writerows(rows)
+            table = pa.Table.from_pylist(list(rows), schema=METADATA_PARQUET_SCHEMA)
+            pq.write_table(table, temp_file, compression="snappy")
 
         if temp_path is None:
-            raise RuntimeError("Failed to create temporary metadata CSV file")
+            raise RuntimeError("Failed to create temporary metadata Parquet file")
 
         temp_path.replace(path)
     except Exception:
@@ -128,7 +151,7 @@ def write_metadata_csv(
         raise
 
 
-def generate_metadata_csvs(
+def generate_metadata_parquet_files(
     output_dir: str | Path = "metadata",
     dbs: Sequence[str] | None = None,
     min_request_interval: float = 1.0,
@@ -144,7 +167,7 @@ def generate_metadata_csvs(
 
     progress = tqdm(
         total=len(requested_dbs),
-        desc="Generating metadata CSV",
+        desc="Generating metadata Parquet",
         unit="db",
         disable=not show_progress,
     )
@@ -154,7 +177,7 @@ def generate_metadata_csvs(
                 try:
                     metadata = client.get_metadata(db)
                     rows = metadata_entries_to_rows(db, metadata.result_set)
-                    write_metadata_csv(output_dir_path / f"{db}.csv", rows)
+                    write_metadata_parquet(output_dir_path / f"{db}.parquet", rows)
                 except Exception as exc:
                     error_messages[db] = str(exc)
                     progress.set_postfix_str(f"{db}: failed")

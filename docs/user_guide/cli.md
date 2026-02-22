@@ -13,7 +13,7 @@ After installation, the `boj-stat-search` command is available. It provides six 
 | `show-layers` | Show the layer structure of a database |
 | `get-data-code` | Get data by series code (JSON) |
 | `get-data-layer` | Get data by layer and frequency (JSON) |
-| `generate-metadata-csv` | Generate per-DB metadata CSV files under a local directory |
+| `generate-metadata-parquet` | Generate per-DB metadata Parquet files under a local directory |
 
 Run `boj-stat-search --help` to see all commands, or `boj-stat-search <command> --help` for command-specific help.
 
@@ -120,37 +120,37 @@ boj-stat-search get-data-code FM01 STRDCLUCON > data.json
 boj-stat-search get-data-layer BP01 M "1,1,1" | jq '.result_set[].SERIES_CODE'
 ```
 
-## Generate Metadata CSV Files
+## Generate Metadata Parquet Files
 
 ```bash
-boj-stat-search generate-metadata-csv
+boj-stat-search generate-metadata-parquet
 ```
 
 Fetches metadata for all known DBs and writes one file per DB under `metadata/`:
 The command shows a live `tqdm` progress bar while DBs are being processed.
 
 ```text
-metadata/FM01.csv
-metadata/BP01.csv
+metadata/FM01.parquet
+metadata/BP01.parquet
 ...
 ```
 
 Select specific DBs with repeatable `--db` options:
 
 ```bash
-boj-stat-search generate-metadata-csv --db FM01 --db BP01
+boj-stat-search generate-metadata-parquet --db FM01 --db BP01
 ```
 
 Write to a custom directory:
 
 ```bash
-boj-stat-search generate-metadata-csv --output-dir ./tmp/metadata
+boj-stat-search generate-metadata-parquet --output-dir ./tmp/metadata
 ```
 
 Control request pacing (seconds between calls):
 
 ```bash
-boj-stat-search generate-metadata-csv --min-request-interval 0.5
+boj-stat-search generate-metadata-parquet --min-request-interval 0.5
 ```
 
 If one or more DB requests fail, the command continues processing remaining DBs, prints failures, and exits with code 1.

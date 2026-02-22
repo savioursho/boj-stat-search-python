@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-import csv
 from pathlib import Path
 from typing import Any
 
+import pyarrow.parquet as pq
+
 from boj_stat_search.catalog import (
-    METADATA_CSV_COLUMNS,
-    generate_metadata_csvs,
+    METADATA_PARQUET_COLUMNS,
+    generate_metadata_parquet_files,
     metadata_entries_to_rows,
-    write_metadata_csv,
+    write_metadata_parquet,
 )
 from boj_stat_search.models import MetadataEntry, MetadataResponse
 
@@ -18,6 +19,8 @@ def _make_entry(
     *,
     name_j: str = "name-j",
     name_en: str = "name-en",
+    notes_j: str = "",
+    notes_en: str = "",
 ) -> MetadataEntry:
     return MetadataEntry(
         series_code=series_code,
@@ -36,8 +39,8 @@ def _make_entry(
         start_of_the_time_series="199901",
         end_of_the_time_series="202601",
         last_update="20260222",
-        notes_j="",
-        notes="",
+        notes_j=notes_j,
+        notes=notes_en,
     )
 
 
@@ -59,13 +62,18 @@ def test_metadata_entries_to_rows_filters_empty_series_code_and_maps_fields() ->
         "FM01",
         (
             _make_entry(""),
-            _make_entry("STRDCLUCON", name_j="無担保コール", name_en="Call Rate"),
+            _make_entry(
+                "STRDCLUCON",
+                name_j="無担保コール",
+                name_en="Call Rate",
+                notes_j="備考",
+                notes_en="note",
+            ),
         ),
     )
 
     assert rows == [
         {
-            "db": "FM01",
             "series_code": "STRDCLUCON",
             "name_j": "無担保コール",
             "name_en": "Call Rate",
@@ -82,14 +90,15 @@ def test_metadata_entries_to_rows_filters_empty_series_code_and_maps_fields() ->
             "start_of_time_series": "199901",
             "end_of_time_series": "202601",
             "last_update": "20260222",
+            "notes_j": "備考",
+            "notes_en": "note",
         }
     ]
 
 
-def test_write_metadata_csv_writes_expected_schema_and_rows(tmp_path: Path) -> None:
+def test_write_metadata_parquet_writes_expected_schema_and_rows(tmp_path: Path) -> None:
     rows = [
         {
-            "db": "FM01",
             "series_code": "STRDCLUCON",
             "name_j": "name-j",
             "name_en": "name-en",
@@ -106,22 +115,18 @@ def test_write_metadata_csv_writes_expected_schema_and_rows(tmp_path: Path) -> N
             "start_of_time_series": "199901",
             "end_of_time_series": "202601",
             "last_update": "20260222",
+            "notes_j": "notes-j",
+            "notes_en": "notes-en",
         }
     ]
-    output = tmp_path / "metadata" / "FM01.csv"
+    output = tmp_path / "metadata" / "FM01.parquet"
 
-    write_metadata_csv(output, rows)
+    write_metadata_parquet(output, rows)
 
-    header = output.read_text(encoding="utf-8").splitlines()[0]
-    assert header == ",".join(METADATA_CSV_COLUMNS)
-
-    with output.open(newline="", encoding="utf-8") as handle:
-        reader = csv.DictReader(handle)
-        parsed_rows = list(reader)
-
-    assert len(parsed_rows) == 1
-    assert parsed_rows[0]["db"] == "FM01"
-    assert parsed_rows[0]["series_code"] == "STRDCLUCON"
+    table = pq.read_table(output)
+    assert table.column_names == list(METADATA_PARQUET_COLUMNS)
+    parsed_rows = table.to_pylist()
+    assert parsed_rows == rows
 
 
 class _FakeClient:
@@ -146,7 +151,7 @@ class _FakeClient:
         return response
 
 
-def test_generate_metadata_csvs_writes_files_and_is_idempotent(
+def test_generate_metadata_parquet_files_writes_files_and_is_idempotent(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -174,18 +179,18 @@ def test_generate_metadata_csvs_writes_files_and_is_idempotent(
     )
 
     output_dir = tmp_path / "metadata"
-    report1 = generate_metadata_csvs(
+    report1 = generate_metadata_parquet_files(
         output_dir=output_dir,
         dbs=["FM01", "FM01", "BP01"],
         min_request_interval=0.25,
     )
 
-    fm01_csv = output_dir / "FM01.csv"
-    bp01_csv = output_dir / "BP01.csv"
-    first_fm01_content = fm01_csv.read_text(encoding="utf-8")
-    first_bp01_content = bp01_csv.read_text(encoding="utf-8")
+    fm01_parquet = output_dir / "FM01.parquet"
+    bp01_parquet = output_dir / "BP01.parquet"
+    first_fm01_rows = pq.read_table(fm01_parquet).to_pylist()
+    first_bp01_rows = pq.read_table(bp01_parquet).to_pylist()
 
-    report2 = generate_metadata_csvs(
+    report2 = generate_metadata_parquet_files(
         output_dir=output_dir,
         dbs=["FM01", "BP01"],
         min_request_interval=0.25,
@@ -202,10 +207,12 @@ def test_generate_metadata_csvs_writes_files_and_is_idempotent(
     assert report1.row_counts["BP01"] == 2
     assert dict(report1.error_messages) == {}
 
-    assert fm01_csv.exists()
-    assert bp01_csv.exists()
-    assert fm01_csv.read_text(encoding="utf-8") == first_fm01_content
-    assert bp01_csv.read_text(encoding="utf-8") == first_bp01_content
+    assert fm01_parquet.exists()
+    assert bp01_parquet.exists()
+    assert pq.read_table(fm01_parquet).column_names == list(METADATA_PARQUET_COLUMNS)
+    assert pq.read_table(bp01_parquet).column_names == list(METADATA_PARQUET_COLUMNS)
+    assert pq.read_table(fm01_parquet).to_pylist() == first_fm01_rows
+    assert pq.read_table(bp01_parquet).to_pylist() == first_bp01_rows
     assert report2.is_success is True
 
     assert len(created_clients) == 2
@@ -213,7 +220,7 @@ def test_generate_metadata_csvs_writes_files_and_is_idempotent(
     assert created_clients[0].calls == ["FM01", "BP01"]
 
 
-def test_generate_metadata_csvs_continues_on_failures_and_reports_them(
+def test_generate_metadata_parquet_files_continues_on_failures_and_reports_them(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -230,7 +237,7 @@ def test_generate_metadata_csvs_continues_on_failures_and_reports_them(
     )
 
     output_dir = tmp_path / "metadata"
-    report = generate_metadata_csvs(output_dir=output_dir, dbs=["FM01", "BP01"])
+    report = generate_metadata_parquet_files(output_dir=output_dir, dbs=["FM01", "BP01"])
 
     assert report.is_success is False
     assert report.succeeded_dbs == ("FM01",)
@@ -238,11 +245,11 @@ def test_generate_metadata_csvs_continues_on_failures_and_reports_them(
     assert report.row_counts["FM01"] == 1
     assert report.error_messages["BP01"] == "boom"
 
-    assert (output_dir / "FM01.csv").exists()
-    assert not (output_dir / "BP01.csv").exists()
+    assert (output_dir / "FM01.parquet").exists()
+    assert not (output_dir / "BP01.parquet").exists()
 
 
-def test_generate_metadata_csvs_uses_tqdm_when_show_progress_enabled(
+def test_generate_metadata_parquet_files_uses_tqdm_when_show_progress_enabled(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -285,7 +292,7 @@ def test_generate_metadata_csvs_uses_tqdm_when_show_progress_enabled(
     )
     monkeypatch.setattr("boj_stat_search.catalog.exporter.tqdm", fake_tqdm)
 
-    report = generate_metadata_csvs(
+    report = generate_metadata_parquet_files(
         output_dir=tmp_path / "metadata",
         dbs=["FM01", "BP01"],
         show_progress=True,
@@ -293,7 +300,7 @@ def test_generate_metadata_csvs_uses_tqdm_when_show_progress_enabled(
 
     progress = created["progress"]
     assert progress.total == 2
-    assert progress.desc == "Generating metadata CSV"
+    assert progress.desc == "Generating metadata Parquet"
     assert progress.unit == "db"
     assert progress.disable is False
     assert progress.updated == 2

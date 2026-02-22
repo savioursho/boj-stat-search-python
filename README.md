@@ -44,8 +44,8 @@ show_layers(metadata.result_set, layer="1,1")
 ```
 
 ```bash
-# Generate per-DB metadata CSV files locally
-boj-stat-search generate-metadata-csv --output-dir metadata
+# Generate per-DB metadata Parquet files locally
+boj-stat-search generate-metadata-parquet --output-dir metadata
 ```
 
 ## Documentation

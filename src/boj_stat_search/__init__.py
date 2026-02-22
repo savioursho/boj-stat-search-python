@@ -8,7 +8,7 @@ from boj_stat_search.api import (
     get_metadata,
     get_metadata_raw,
 )
-from boj_stat_search.catalog import MetadataExportReport, generate_metadata_csvs
+from boj_stat_search.catalog import MetadataExportReport, generate_metadata_parquet_files
 from boj_stat_search.core import Frequency, Layer, Period, list_db
 from boj_stat_search.display import show_layers
 from boj_stat_search.models import (
@@ -28,7 +28,7 @@ __all__ = [
     "get_data_code",
     "get_data_layer_raw",
     "get_data_layer",
-    "generate_metadata_csvs",
+    "generate_metadata_parquet_files",
     "Frequency",
     "Layer",
     "Period",
