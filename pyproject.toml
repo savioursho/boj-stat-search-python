@@ -1,6 +1,6 @@
 [project]
 name = "boj-stat-search"
-version = "0.2.0"
+version = "0.3.0"
 description = "Python client for the Bank of Japan Time Series Statistical Data Search API"
 readme = "README.md"
 license = { text = "MIT" }
