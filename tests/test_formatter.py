@@ -137,8 +137,6 @@ def test_format_layer_tree_rejects_invalid_layer_filter_token():
 
 
 def test_format_layer_tree_returns_empty_string_when_no_entry_matches_filter():
-    entries = (
-        _entry(series_code="A", name_of_time_series="A", layer1=1, layer2=1),
-    )
+    entries = (_entry(series_code="A", name_of_time_series="A", layer1=1, layer2=1),)
 
     assert format_layer_tree(entries, layer=Layer(2)) == ""

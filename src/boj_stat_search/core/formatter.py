@@ -46,7 +46,9 @@ def _parse_layer_filter(layer: Layer | str | None) -> tuple[str, ...] | None:
 
     tokens = [token.strip() for token in raw.split(",")]
     if len(tokens) < 1 or len(tokens) > _MAX_LAYER_DEPTH:
-        raise ValueError("layer filter: must have between 1 and 5 comma-separated values")
+        raise ValueError(
+            "layer filter: must have between 1 and 5 comma-separated values"
+        )
     if any(token == "" for token in tokens):
         raise ValueError("layer filter: must not contain empty values")
     if any(token != "*" and not token.isdigit() for token in tokens):

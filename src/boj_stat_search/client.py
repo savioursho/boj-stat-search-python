@@ -45,8 +45,13 @@ class BojClient:
         start_position: int | None = None,
     ) -> DataResponse:
         return get_data_code(
-            db, code, start_date, end_date, start_position,
-            self.on_validation_error, client=self._client,
+            db,
+            code,
+            start_date,
+            end_date,
+            start_position,
+            self.on_validation_error,
+            client=self._client,
         )
 
     def get_data_layer(
@@ -59,6 +64,12 @@ class BojClient:
         start_position: int | None = None,
     ) -> DataResponse:
         return get_data_layer(
-            db, frequency, layer, start_date, end_date, start_position,
-            self.on_validation_error, client=self._client,
+            db,
+            frequency,
+            layer,
+            start_date,
+            end_date,
+            start_position,
+            self.on_validation_error,
+            client=self._client,
         )

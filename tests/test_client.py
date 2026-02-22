@@ -11,6 +11,7 @@ from boj_stat_search.models import DataResponse, MetadataResponse
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_metadata_response() -> MetadataResponse:
     return MetadataResponse(
         status=200,
@@ -38,6 +39,7 @@ def _make_data_response() -> DataResponse:
 # Context manager
 # ---------------------------------------------------------------------------
 
+
 def test_context_manager_returns_self():
     with BojClient() as c:
         assert isinstance(c, BojClient)
@@ -64,6 +66,7 @@ def test_context_manager_delegates_get_metadata():
 # Explicit close
 # ---------------------------------------------------------------------------
 
+
 def test_explicit_close_closes_internal_client():
     with patch("boj_stat_search.client.httpx.Client") as MockClient:
         mock_instance = MockClient.return_value
@@ -84,6 +87,7 @@ def test_close_is_idempotent_for_internal_client():
 # ---------------------------------------------------------------------------
 # External client — close is a no-op
 # ---------------------------------------------------------------------------
+
 
 def test_external_client_is_not_closed_on_exit():
     external = Mock(spec=httpx.Client)
@@ -113,6 +117,7 @@ def test_external_client_is_used_for_requests():
 # Delegation — get_metadata
 # ---------------------------------------------------------------------------
 
+
 def test_get_metadata_delegates_to_functional_api():
     expected = _make_metadata_response()
     with patch("boj_stat_search.client.get_metadata", return_value=expected) as mock_fn:
@@ -126,9 +131,12 @@ def test_get_metadata_delegates_to_functional_api():
 # Delegation — get_data_code
 # ---------------------------------------------------------------------------
 
+
 def test_get_data_code_delegates_minimal_args():
     expected = _make_data_response()
-    with patch("boj_stat_search.client.get_data_code", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.client.get_data_code", return_value=expected
+    ) as mock_fn:
         c = BojClient()
         result = c.get_data_code("FM01", "STRDCLUCON")
     mock_fn.assert_called_once_with(
@@ -139,10 +147,13 @@ def test_get_data_code_delegates_minimal_args():
 
 def test_get_data_code_delegates_all_optional_args():
     expected = _make_data_response()
-    with patch("boj_stat_search.client.get_data_code", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.client.get_data_code", return_value=expected
+    ) as mock_fn:
         c = BojClient()
         result = c.get_data_code(
-            "FM01", "STRDCLUCON",
+            "FM01",
+            "STRDCLUCON",
             start_date="202501",
             end_date="202512",
             start_position=10,
@@ -157,9 +168,12 @@ def test_get_data_code_delegates_all_optional_args():
 # Delegation — get_data_layer
 # ---------------------------------------------------------------------------
 
+
 def test_get_data_layer_delegates_minimal_args():
     expected = _make_data_response()
-    with patch("boj_stat_search.client.get_data_layer", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.client.get_data_layer", return_value=expected
+    ) as mock_fn:
         c = BojClient()
         result = c.get_data_layer("MD10", "Q", "*")
     mock_fn.assert_called_once_with(
@@ -170,10 +184,14 @@ def test_get_data_layer_delegates_minimal_args():
 
 def test_get_data_layer_delegates_all_optional_args():
     expected = _make_data_response()
-    with patch("boj_stat_search.client.get_data_layer", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.client.get_data_layer", return_value=expected
+    ) as mock_fn:
         c = BojClient()
         result = c.get_data_layer(
-            "BP01", "M", "1,1,1",
+            "BP01",
+            "M",
+            "1,1,1",
             start_date="202504",
             end_date="202509",
             start_position=255,
@@ -187,6 +205,7 @@ def test_get_data_layer_delegates_all_optional_args():
 # ---------------------------------------------------------------------------
 # on_validation_error propagation
 # ---------------------------------------------------------------------------
+
 
 def test_on_validation_error_default_is_raise():
     c = BojClient()
@@ -203,7 +222,9 @@ def test_on_validation_error_forwarded_to_get_metadata():
 
 def test_on_validation_error_forwarded_to_get_data_code():
     expected = _make_data_response()
-    with patch("boj_stat_search.client.get_data_code", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.client.get_data_code", return_value=expected
+    ) as mock_fn:
         c = BojClient(on_validation_error="ignore")
         c.get_data_code("FM01", "STRDCLUCON")
     mock_fn.assert_called_once_with(
@@ -213,7 +234,9 @@ def test_on_validation_error_forwarded_to_get_data_code():
 
 def test_on_validation_error_forwarded_to_get_data_layer():
     expected = _make_data_response()
-    with patch("boj_stat_search.client.get_data_layer", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.client.get_data_layer", return_value=expected
+    ) as mock_fn:
         c = BojClient(on_validation_error="warn")
         c.get_data_layer("MD10", "Q", "*")
     mock_fn.assert_called_once_with(
