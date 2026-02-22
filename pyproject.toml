@@ -1,8 +1,9 @@
 [project]
 name = "boj-stat-search"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python client for the Bank of Japan Time Series Statistical Data Search API"
 readme = "README.md"
+license = { text = "MIT" }
 authors = [
     { name = "saviour", email = "savioursho@gmail.com" }
 ]
