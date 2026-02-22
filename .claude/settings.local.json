@@ -6,7 +6,8 @@
       "Bash(uv run:*)",
       "WebFetch(domain:www.stat-search.boj.or.jp)",
       "WebFetch(domain:www.boj.or.jp)",
-      "Bash(markitdown /mnt/c/Users/savio/Documents/boj-stat-search/docs/user_guide/../../../api_notice.pdf 2>&1 || markitdown https://www.stat-search.boj.or.jp/info/api_notice.pdf 2>&1)"
+      "Bash(markitdown /mnt/c/Users/savio/Documents/boj-stat-search/docs/user_guide/../../../api_notice.pdf 2>&1 || markitdown https://www.stat-search.boj.or.jp/info/api_notice.pdf 2>&1)",
+      "Bash(wc:*)"
     ]
   }
 }
