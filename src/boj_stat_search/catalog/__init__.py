@@ -12,7 +12,7 @@ from boj_stat_search.catalog.loader import (
     load_catalog_all,
     load_catalog_db,
 )
-from boj_stat_search.catalog.search import search_series
+from boj_stat_search.catalog.search import list_series, search_series
 
 __all__ = [
     "METADATA_PARQUET_COLUMNS",
@@ -25,5 +25,6 @@ __all__ = [
     "CatalogCacheError",
     "load_catalog_db",
     "load_catalog_all",
+    "list_series",
     "search_series",
 ]

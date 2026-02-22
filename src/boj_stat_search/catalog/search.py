@@ -106,6 +106,32 @@ def search_series(
     )
 
 
+def list_series(
+    db: str,
+    *,
+    cache_ttl_seconds: int = DEFAULT_CACHE_TTL_SECONDS,
+    cache_dir: str | Path | None = None,
+    repo: str = DEFAULT_CATALOG_REPO,
+    ref: str = DEFAULT_CATALOG_REF,
+    metadata_dir: str = DEFAULT_METADATA_DIR,
+    client: httpx.Client | None = None,
+) -> tuple[SeriesCatalogEntry, ...]:
+    """List all local metadata catalog entries for one DB."""
+    known_dbs = {db_info.name for db_info in list_db()}
+    _validate_db_name(db, known_dbs=known_dbs)
+
+    table = load_catalog_db(
+        db,
+        cache_ttl_seconds=cache_ttl_seconds,
+        cache_dir=cache_dir,
+        repo=repo,
+        ref=ref,
+        metadata_dir=metadata_dir,
+        client=client,
+    )
+    return _table_to_entries(table)
+
+
 def _normalize_keyword(keyword: str) -> str:
     if not isinstance(keyword, str):
         raise ValueError("keyword: must be a string")
@@ -125,8 +151,7 @@ def _resolve_dbs(
         raise ValueError("db and dbs cannot both be provided")
 
     if db is not None:
-        if db not in known_dbs:
-            raise ValueError("db: must be one of known DB names in list_db()")
+        _validate_db_name(db, known_dbs=known_dbs)
         return (db,)
 
     if dbs is None:
@@ -145,6 +170,13 @@ def _resolve_dbs(
         resolved_dbs.append(name)
 
     return tuple(resolved_dbs)
+
+
+def _validate_db_name(db: str, *, known_dbs: set[str]) -> None:
+    if not isinstance(db, str):
+        raise ValueError("db: must be one of known DB names in list_db()")
+    if db not in known_dbs:
+        raise ValueError("db: must be one of known DB names in list_db()")
 
 
 def _coerce_and_validate_layer(layer: Layer | str | None) -> tuple[str, ...] | None:

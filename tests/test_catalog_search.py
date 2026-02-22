@@ -7,7 +7,7 @@ import httpx
 import pyarrow as pa
 import pytest
 
-from boj_stat_search.catalog import CatalogError, search_series
+from boj_stat_search.catalog import CatalogError, list_series, search_series
 from boj_stat_search.core import Layer
 from boj_stat_search.models import SeriesCatalogEntry
 
@@ -344,3 +344,84 @@ def test_search_series_raises_catalog_error_when_columns_missing(monkeypatch) ->
 
     with pytest.raises(CatalogError, match="missing required columns"):
         search_series("fm01")
+
+
+def test_list_series_returns_all_rows_for_db(monkeypatch) -> None:
+    load_db = Mock(
+        return_value=_table(
+            [
+                _make_row(
+                    db="FM08",
+                    series_code="FM08'A",
+                    name_j="A",
+                    name_en="A",
+                ),
+                _make_row(
+                    db="FM08",
+                    series_code="FM08'B",
+                    name_j="B",
+                    name_en="B",
+                ),
+            ]
+        )
+    )
+    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+
+    results = list_series("FM08")
+
+    assert tuple(entry.series_code for entry in results) == ("FM08'A", "FM08'B")
+    assert all(isinstance(entry, SeriesCatalogEntry) for entry in results)
+    load_db.assert_called_once()
+
+
+def test_list_series_rejects_unknown_db() -> None:
+    with pytest.raises(ValueError, match="list_db"):
+        list_series("UNKNOWN")
+
+
+def test_list_series_forwards_cache_and_client_options(monkeypatch) -> None:
+    load_db = Mock(
+        return_value=_table(
+            [
+                _make_row(
+                    db="FM01",
+                    series_code="FM01'A",
+                    name_j="A",
+                    name_en="A",
+                )
+            ]
+        )
+    )
+    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+
+    client = Mock(spec=httpx.Client)
+    cache_dir = Path("/tmp/catalog-cache")
+    list_series(
+        "FM01",
+        cache_ttl_seconds=60,
+        cache_dir=cache_dir,
+        repo="owner/repo",
+        ref="develop",
+        metadata_dir="metadata",
+        client=client,
+    )
+
+    load_db.assert_called_once_with(
+        "FM01",
+        cache_ttl_seconds=60,
+        cache_dir=cache_dir,
+        repo="owner/repo",
+        ref="develop",
+        metadata_dir="metadata",
+        client=client,
+    )
+
+
+def test_list_series_raises_catalog_error_when_columns_missing(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.catalog.search.load_catalog_db",
+        lambda *_, **__: pa.table({"series_code": ["FM01'A"]}),
+    )
+
+    with pytest.raises(CatalogError, match="missing required columns"):
+        list_series("FM01")

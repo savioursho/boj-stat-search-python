@@ -31,6 +31,16 @@ for entry in results[:5]:
     print(entry.db, entry.series_code, entry.name_en)
 ```
 
+Use `list_series` to list every series in one DB.
+
+```python
+from boj_stat_search import list_series
+
+series = list_series("FM08")
+for entry in series[:5]:
+    print(entry.series_code, entry.name_en)
+```
+
 ## Data by Layer + Frequency
 
 Use `get_data_layer` to query by hierarchy.
@@ -241,6 +251,7 @@ from boj_stat_search import (
     Period,
     get_data_code,
     get_data_layer,
+    list_series,
     search_series,
 )
 ```
