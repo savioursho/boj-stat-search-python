@@ -16,6 +16,7 @@ from boj_stat_search.catalog import (
     generate_metadata_parquet_files,
     load_catalog_all,
     load_catalog_db,
+    search_series,
 )
 from boj_stat_search.core import Frequency, Layer, Period, list_db
 from boj_stat_search.display import show_layers
@@ -25,6 +26,7 @@ from boj_stat_search.models import (
     DbInfo,
     MetadataEntry,
     MetadataResponse,
+    SeriesCatalogEntry,
 )
 
 __all__ = [
@@ -39,6 +41,7 @@ __all__ = [
     "generate_metadata_parquet_files",
     "load_catalog_db",
     "load_catalog_all",
+    "search_series",
     "Frequency",
     "Layer",
     "Period",
@@ -49,6 +52,7 @@ __all__ = [
     "BaseResponse",
     "DbInfo",
     "MetadataEntry",
+    "SeriesCatalogEntry",
     "MetadataResponse",
     "DataResponse",
     "list_db",

@@ -17,6 +17,7 @@ from boj_stat_search.catalog import (
     generate_metadata_parquet_files as catalog_generate_metadata_parquet_files,
     load_catalog_all as catalog_load_catalog_all,
     load_catalog_db as catalog_load_catalog_db,
+    search_series as catalog_search_series,
 )
 from boj_stat_search.core import Frequency as CoreFrequency
 from boj_stat_search.core import Layer as CoreLayer
@@ -27,6 +28,7 @@ from boj_stat_search.models import (
     DataResponse as ModelsDataResponse,
     MetadataEntry as ModelsMetadataEntry,
     MetadataResponse as ModelsMetadataResponse,
+    SeriesCatalogEntry as ModelsSeriesCatalogEntry,
 )
 
 
@@ -43,6 +45,7 @@ def test_top_level_re_exports_functional_api():
     )
     assert bss.load_catalog_db is catalog_load_catalog_db
     assert bss.load_catalog_all is catalog_load_catalog_all
+    assert bss.search_series is catalog_search_series
     assert bss.show_layers is display_show_layers
 
 
@@ -56,6 +59,7 @@ def test_top_level_re_exports_key_types_and_models():
     assert bss.CatalogCacheError is CatalogCatalogCacheError
     assert bss.BaseResponse is ModelsBaseResponse
     assert bss.MetadataEntry is ModelsMetadataEntry
+    assert bss.SeriesCatalogEntry is ModelsSeriesCatalogEntry
     assert bss.MetadataResponse is ModelsMetadataResponse
     assert bss.DataResponse is ModelsDataResponse
 
@@ -73,6 +77,7 @@ def test_top_level_has_expected_public_symbols():
         "generate_metadata_parquet_files",
         "load_catalog_db",
         "load_catalog_all",
+        "search_series",
         "Frequency",
         "Layer",
         "Period",
@@ -83,6 +88,7 @@ def test_top_level_has_expected_public_symbols():
         "BaseResponse",
         "DbInfo",
         "MetadataEntry",
+        "SeriesCatalogEntry",
         "MetadataResponse",
         "DataResponse",
         "list_db",

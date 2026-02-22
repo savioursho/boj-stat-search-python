@@ -56,6 +56,14 @@ fm01_catalog = load_catalog_db("FM01")
 print(fm01_catalog.num_rows)
 ```
 
+```python
+from boj_stat_search import search_series
+
+# Search across local catalog metadata (cached automatically)
+results = search_series("exchange rate", db="FM01")
+print(results[0].series_code if results else "no match")
+```
+
 ## Documentation
 
 - [User Guide](./docs/user_guide/README.md)
