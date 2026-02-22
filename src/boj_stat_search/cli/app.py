@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 import typer
 
 from boj_stat_search.api import BojApiError, get_data_code, get_data_layer, get_metadata
-from boj_stat_search.catalog import generate_metadata_csvs
+from boj_stat_search.catalog import generate_metadata_parquet_files
 from boj_stat_search.core import list_db
 from boj_stat_search.display import show_layers
 
@@ -128,14 +128,14 @@ def get_data_layer_cmd(
     typer.echo(json.dumps(asdict(result), ensure_ascii=False, indent=2))
 
 
-@app.command("generate-metadata-csv")
-def generate_metadata_csv_cmd(
+@app.command("generate-metadata-parquet")
+def generate_metadata_parquet_cmd(
     output_dir: Annotated[
         str,
         typer.Option(
             "--output-dir",
             "-o",
-            help="Directory where per-DB metadata CSV files will be written",
+            help="Directory where per-DB metadata Parquet files will be written",
         ),
     ] = "metadata",
     db: Annotated[
@@ -153,8 +153,8 @@ def generate_metadata_csv_cmd(
         ),
     ] = 1.0,
 ) -> None:
-    """Generate per-DB metadata CSV files."""
-    report = generate_metadata_csvs(
+    """Generate per-DB metadata Parquet files."""
+    report = generate_metadata_parquet_files(
         output_dir=output_dir,
         dbs=db,
         min_request_interval=min_request_interval,
@@ -167,7 +167,7 @@ def generate_metadata_csv_cmd(
 
     if report.failed_count > 0:
         typer.echo(
-            f"Metadata export completed with failures "
+            f"Metadata Parquet export completed with failures "
             f"({report.succeeded_count}/{report.total_dbs} succeeded).",
             err=True,
         )
@@ -177,7 +177,7 @@ def generate_metadata_csv_cmd(
         raise typer.Exit(code=1)
 
     typer.echo(
-        f"Metadata export completed successfully "
+        f"Metadata Parquet export completed successfully "
         f"({report.succeeded_count}/{report.total_dbs} succeeded)."
     )
 

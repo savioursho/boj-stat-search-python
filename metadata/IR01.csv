@@ -1,3 +1,0 @@
-db,series_code,name_j,name_en,unit_j,unit_en,frequency,category_j,category_en,layer1,layer2,layer3,layer4,layer5,start_of_time_series,end_of_time_series,last_update
-IR01,MADR1Z@D,基準割引率および基準貸付利率,The Basic Discount Rate and Basic Loan Rate,年％,Percent per annum,DAILY,基準割引率および基準貸付利率,The Basic Discount Rates and Basic Loan Rates,1,1,0,0,0,18821011,20260218,20260220
-IR01,MADR1M,基準割引率および基準貸付利率,The Basic Discount Rate and Basic Loan Rate,年％,Percent per annum,MONTHLY,基準割引率および基準貸付利率,The Basic Discount Rates and Basic Loan Rates,1,2,0,0,0,188210,202601,20260203

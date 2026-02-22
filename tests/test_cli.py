@@ -233,16 +233,16 @@ class TestGetDataLayer:
         assert result.exit_code != 0
 
 
-class TestGenerateMetadataCsv:
+class TestGenerateMetadataParquet:
     def test_success(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.generate_metadata_csvs",
+            "boj_stat_search.cli.app.generate_metadata_parquet_files",
             return_value=_FAKE_EXPORT_REPORT_SUCCESS,
         ) as mock_fn:
             result = runner.invoke(
                 app,
                 [
-                    "generate-metadata-csv",
+                    "generate-metadata-parquet",
                     "--output-dir",
                     "metadata",
                     "--db",
@@ -264,15 +264,16 @@ class TestGenerateMetadataCsv:
         assert "FM01: wrote 12 rows" in result.output
         assert "BP01: wrote 34 rows" in result.output
         assert (
-            "Metadata export completed successfully (2/2 succeeded)." in result.output
+            "Metadata Parquet export completed successfully (2/2 succeeded)."
+            in result.output
         )
 
     def test_failure_exits_non_zero(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.generate_metadata_csvs",
+            "boj_stat_search.cli.app.generate_metadata_parquet_files",
             return_value=_FAKE_EXPORT_REPORT_FAILURE,
         ) as mock_fn:
-            result = runner.invoke(app, ["generate-metadata-csv"])
+            result = runner.invoke(app, ["generate-metadata-parquet"])
 
         assert result.exit_code == 1
         mock_fn.assert_called_once_with(
@@ -283,6 +284,7 @@ class TestGenerateMetadataCsv:
         )
         assert "FM01: wrote 12 rows" in result.output
         assert (
-            "Metadata export completed with failures (1/2 succeeded)." in result.output
+            "Metadata Parquet export completed with failures (1/2 succeeded)."
+            in result.output
         )
         assert "BP01: boom" in result.output

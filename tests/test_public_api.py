@@ -11,7 +11,7 @@ from boj_stat_search.api import (
 )
 from boj_stat_search.catalog import (
     MetadataExportReport as CatalogMetadataExportReport,
-    generate_metadata_csvs as catalog_generate_metadata_csvs,
+    generate_metadata_parquet_files as catalog_generate_metadata_parquet_files,
 )
 from boj_stat_search.core import Frequency as CoreFrequency
 from boj_stat_search.core import Layer as CoreLayer
@@ -33,7 +33,9 @@ def test_top_level_re_exports_functional_api():
     assert bss.get_data_code is api_get_data_code
     assert bss.get_data_layer_raw is api_get_data_layer_raw
     assert bss.get_data_layer is api_get_data_layer
-    assert bss.generate_metadata_csvs is catalog_generate_metadata_csvs
+    assert (
+        bss.generate_metadata_parquet_files is catalog_generate_metadata_parquet_files
+    )
     assert bss.show_layers is display_show_layers
 
 
@@ -58,7 +60,7 @@ def test_top_level_has_expected_public_symbols():
         "get_data_code",
         "get_data_layer_raw",
         "get_data_layer",
-        "generate_metadata_csvs",
+        "generate_metadata_parquet_files",
         "Frequency",
         "Layer",
         "Period",

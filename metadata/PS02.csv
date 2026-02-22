@@ -1,8 +1,0 @@
-db,series_code,name_j,name_en,unit_j,unit_en,frequency,category_j,category_en,layer1,layer2,layer3,layer4,layer5,start_of_time_series,end_of_time_series,last_update
-PS02,PM090120001,フェイルの発生状況/合計件数(件）,Basic figures on fails/Number of fails(cases),件,cases,MONTHLY,フェイルの発生状況,Basic Figures on Fails,1,1,0,0,0,200101,202601,20260213
-PS02,PM090120002,フェイルの発生状況/額面総額（億円）,Basic figures on fails/Total face value(100 million yen),億円,100 million yen,MONTHLY,フェイルの発生状況,Basic Figures on Fails,1,2,0,0,0,200101,202601,20260213
-PS02,PM090120003,フェイルの発生状況/平均期間（営業日／件）,Basic figures on fails/Average duration(business days),営業日／件,business days,MONTHLY,フェイルの発生状況,Basic Figures on Fails,1,3,0,0,0,200101,202601,20260213
-PS02,PM090120004,フェイルの発生状況/最長期間（営業日）,Basic figures on fails/Longest duration(business days),営業日,business days,MONTHLY,フェイルの発生状況,Basic Figures on Fails,1,4,0,0,0,200101,202601,20260213
-PS02,PM090120005,フェイルの発生状況/バイ・イン  合計件数（件）,Basic figures on fails/Number of buy-ins(cases),件,cases,MONTHLY,フェイルの発生状況,Basic Figures on Fails,1,5,0,0,0,200101,202601,20260213
-PS02,PM090120006,＜参考＞国債ＤＶＰ（口座振替）/合計件数(件),<Memorandum>DVP settlement of JGB(book-entry transfers)/Number of transactions(cases),件,cases,MONTHLY,フェイルの発生状況,Basic Figures on Fails,1,6,0,0,0,200101,202601,20260213
-PS02,PM090120007,＜参考＞国債ＤＶＰ（口座振替）/額面総額(億円）,<Memorandum>DVP settlement of JGB(book-entry transfers)/Total face value(100 million yen),億円,100 million yen,MONTHLY,フェイルの発生状況,Basic Figures on Fails,1,7,0,0,0,200101,202601,20260213
