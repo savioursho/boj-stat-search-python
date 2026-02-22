@@ -64,6 +64,14 @@ results = search_series("exchange rate", db="FM01")
 print(results[0].series_code if results else "no match")
 ```
 
+```python
+from boj_stat_search import list_series
+
+# List all series in one DB from the local catalog
+series = list_series("FM08")
+print(len(series))
+```
+
 ## Documentation
 
 - [User Guide](./docs/user_guide/README.md)

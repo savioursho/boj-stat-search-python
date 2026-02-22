@@ -15,6 +15,7 @@ from boj_stat_search.catalog import (
     CatalogFetchError as CatalogCatalogFetchError,
     MetadataExportReport as CatalogMetadataExportReport,
     generate_metadata_parquet_files as catalog_generate_metadata_parquet_files,
+    list_series as catalog_list_series,
     load_catalog_all as catalog_load_catalog_all,
     load_catalog_db as catalog_load_catalog_db,
     search_series as catalog_search_series,
@@ -45,6 +46,7 @@ def test_top_level_re_exports_functional_api():
     )
     assert bss.load_catalog_db is catalog_load_catalog_db
     assert bss.load_catalog_all is catalog_load_catalog_all
+    assert bss.list_series is catalog_list_series
     assert bss.search_series is catalog_search_series
     assert bss.show_layers is display_show_layers
 
@@ -77,6 +79,7 @@ def test_top_level_has_expected_public_symbols():
         "generate_metadata_parquet_files",
         "load_catalog_db",
         "load_catalog_all",
+        "list_series",
         "search_series",
         "Frequency",
         "Layer",
