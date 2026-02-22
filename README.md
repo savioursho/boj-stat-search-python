@@ -48,6 +48,14 @@ show_layers(metadata.result_set, layer="1,1")
 boj-stat-search generate-metadata-parquet --output-dir metadata
 ```
 
+```python
+from boj_stat_search import load_catalog_db
+
+# Download/cache metadata/FM01.parquet locally (24h TTL by default)
+fm01_catalog = load_catalog_db("FM01")
+print(fm01_catalog.num_rows)
+```
+
 ## Documentation
 
 - [User Guide](./docs/user_guide/README.md)

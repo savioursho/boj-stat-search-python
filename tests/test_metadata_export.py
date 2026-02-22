@@ -237,7 +237,9 @@ def test_generate_metadata_parquet_files_continues_on_failures_and_reports_them(
     )
 
     output_dir = tmp_path / "metadata"
-    report = generate_metadata_parquet_files(output_dir=output_dir, dbs=["FM01", "BP01"])
+    report = generate_metadata_parquet_files(
+        output_dir=output_dir, dbs=["FM01", "BP01"]
+    )
 
     assert report.is_success is False
     assert report.succeeded_dbs == ("FM01",)
