@@ -1,6 +1,6 @@
 # boj-stat-search
 
-Python client for the Bank of Japan Stat-Search API.
+**Unofficial** Python client for the [Bank of Japan Time Series Statistical Data Search Site (日本銀行時系列統計データ検索サイト)](https://www.stat-search.boj.or.jp/) API. This package is not affiliated with or endorsed by the Bank of Japan.
 
 ## Installation
 
@@ -42,6 +42,12 @@ from boj_stat_search import get_metadata, show_layers
 metadata = get_metadata(db="BP01")
 show_layers(metadata.result_set, layer="1,1")
 ```
+
+## Official Resources
+
+- [API 公開についてのお知らせ (API Release Notice)](https://www.boj.or.jp/statistics/outline/notice_2026/not260218a.htm)
+- [API マニュアル (API Manual)](https://www.stat-search.boj.or.jp/info/api_manual.pdf)
+- [API 利用上の注意事項 (API Terms of Use)](https://www.stat-search.boj.or.jp/info/api_notice.pdf)
 
 ## Credit
 
