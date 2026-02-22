@@ -41,8 +41,8 @@ jobs:
           branch: automation/update-metadata-parquet
           base: ${{ github.event.repository.default_branch }}
           delete-branch: true
-          commit-message: chore: update metadata parquet
-          title: chore: update metadata parquet
+          commit-message: "chore: update metadata parquet"
+          title: "chore: update metadata parquet"
           body: |
             Automated refresh of metadata Parquet files.
 
