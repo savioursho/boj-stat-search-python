@@ -50,4 +50,4 @@ from boj_stat_search import get_metadata, show_layers
 
 ## Next Step
 
-Return to the [User Guide index](./README.md).
+Continue to [Command-Line Interface](./cli.md).
