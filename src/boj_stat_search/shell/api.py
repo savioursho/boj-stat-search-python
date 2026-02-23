@@ -1,7 +1,7 @@
 import httpx
 from typing import Any
 
-from boj_stat_search.models import DataResponse, MetadataResponse
+from boj_stat_search.core.models import DataResponse, MetadataResponse
 from boj_stat_search.core.parser import (
     parse_data_code_response,
     parse_metadata_response,
@@ -145,7 +145,7 @@ def get_data_code_raw(
         )
         if first_code:
             try:
-                from boj_stat_search.catalog.search import resolve_db
+                from boj_stat_search.shell.catalog.search import resolve_db
 
                 db = resolve_db(first_code)
             except Exception:

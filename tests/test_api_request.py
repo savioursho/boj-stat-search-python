@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import httpx
 import pytest
 
-from boj_stat_search.api import (
+from boj_stat_search.shell.api import (
     BojApiError,
     get_data_code,
     get_data_code_raw,
@@ -13,7 +13,7 @@ from boj_stat_search.api import (
     get_metadata_raw,
 )
 from boj_stat_search.core.types import Code, Frequency, Layer, Period
-from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
+from boj_stat_search.core.models import DataResponse, MetadataEntry, MetadataResponse
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -314,7 +314,7 @@ def test_get_data_code_raw_accepts_code_class_with_embedded_db():
 def test_get_data_code_raw_auto_resolves_db_when_not_provided(monkeypatch) -> None:
     code = "STRDCLUCON"
     resolver = Mock(return_value="FM01")
-    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.resolve_db", resolver)
 
     expected_url = build_data_code_api_url(db="FM01", code=code)
     expected_payload = {"STATUS": 200, "MESSAGEID": "M181000I", "MESSAGE": "ok"}
@@ -337,7 +337,7 @@ def test_get_data_code_raw_auto_resolves_db_when_not_provided(monkeypatch) -> No
 def test_get_data_code_raw_auto_resolve_uses_first_code_only(monkeypatch) -> None:
     code = "FIRST_CODE,SECOND_CODE"
     resolver = Mock(return_value="FM01")
-    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.resolve_db", resolver)
 
     expected_url = build_data_code_api_url(db="FM01", code=code)
     expected_payload = {"STATUS": 200, "MESSAGEID": "M181000I", "MESSAGE": "ok"}
@@ -361,7 +361,7 @@ def test_get_data_code_raw_does_not_auto_resolve_when_db_is_provided(
     monkeypatch,
 ) -> None:
     resolver = Mock(return_value="FM01")
-    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.resolve_db", resolver)
 
     expected_url = build_data_code_api_url(db="CO", code="CODE1")
     expected_payload = {"STATUS": 200, "MESSAGEID": "M181000I", "MESSAGE": "ok"}
@@ -385,7 +385,7 @@ def test_get_data_code_raw_does_not_auto_resolve_when_code_embeds_db(
     monkeypatch,
 ) -> None:
     resolver = Mock(return_value="FM01")
-    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.resolve_db", resolver)
 
     code = Code("FM01'CODE1")
     expected_url = build_data_code_api_url(code=code)
@@ -410,7 +410,7 @@ def test_get_data_code_raw_ignores_auto_resolve_errors_and_falls_back(
     monkeypatch,
 ) -> None:
     resolver = Mock(side_effect=ValueError("not found"))
-    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.resolve_db", resolver)
 
     expected_url = build_data_code_api_url(
         db=None,

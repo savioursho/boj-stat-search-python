@@ -9,9 +9,9 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from boj_stat_search.catalog import CatalogError, list_series, resolve_db, search_series
+from boj_stat_search.shell.catalog import CatalogError, list_series, resolve_db, search_series
 from boj_stat_search.core import Layer
-from boj_stat_search.models import SeriesCatalogEntry
+from boj_stat_search.core.models import SeriesCatalogEntry
 
 
 def _make_row(
@@ -57,7 +57,7 @@ def _table(rows: list[dict[str, str | int]]) -> pa.Table:
 
 def test_search_series_matches_japanese_keyword(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -84,7 +84,7 @@ def test_search_series_matches_japanese_keyword(monkeypatch) -> None:
 
 def test_search_series_matches_english_keyword_case_insensitive(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -110,7 +110,7 @@ def test_search_series_matches_english_keyword_case_insensitive(monkeypatch) -> 
 
 def test_search_series_matches_category_fields(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -152,8 +152,8 @@ def test_search_series_with_db_uses_load_catalog_db(monkeypatch) -> None:
         )
     )
     load_all = Mock()
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_all", load_all)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_all", load_all)
 
     results = search_series("call", db="FM01")
 
@@ -182,8 +182,8 @@ def test_search_series_with_dbs_uses_load_catalog_all(monkeypatch) -> None:
         )
     )
     load_db = Mock()
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_all", load_all)
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_all", load_all)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     results = search_series("rate", dbs=["FM01", "BP01", "FM01"])
 
@@ -201,8 +201,8 @@ def test_search_series_rejects_db_and_dbs_together() -> None:
 def test_search_series_returns_empty_for_empty_dbs(monkeypatch) -> None:
     load_all = Mock()
     load_db = Mock()
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_all", load_all)
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_all", load_all)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     results = search_series("rate", dbs=[])
 
@@ -218,7 +218,7 @@ def test_search_series_rejects_unknown_db() -> None:
 
 def test_search_series_filters_by_layer_prefix_and_wildcard(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -259,7 +259,7 @@ def test_search_series_filters_by_layer_prefix_and_wildcard(monkeypatch) -> None
 
 def test_search_series_accepts_layer_object(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -312,7 +312,7 @@ def test_search_series_forwards_cache_and_client_options(monkeypatch) -> None:
             ]
         )
     )
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     client = Mock(spec=httpx.Client)
     cache_dir = Path("/tmp/catalog-cache")
@@ -340,7 +340,7 @@ def test_search_series_forwards_cache_and_client_options(monkeypatch) -> None:
 
 def test_search_series_raises_catalog_error_when_columns_missing(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: pa.table({"series_code": ["FM01'A"]}),
     )
 
@@ -367,7 +367,7 @@ def test_list_series_returns_all_rows_for_db(monkeypatch) -> None:
             ]
         )
     )
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     results = list_series("FM08")
 
@@ -394,7 +394,7 @@ def test_list_series_forwards_cache_and_client_options(monkeypatch) -> None:
             ]
         )
     )
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     client = Mock(spec=httpx.Client)
     cache_dir = Path("/tmp/catalog-cache")
@@ -421,7 +421,7 @@ def test_list_series_forwards_cache_and_client_options(monkeypatch) -> None:
 
 def test_list_series_raises_catalog_error_when_columns_missing(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_db",
+        "boj_stat_search.shell.catalog.search.load_catalog_db",
         lambda *_, **__: pa.table({"series_code": ["FM01'A"]}),
     )
 
@@ -441,7 +441,7 @@ def test_resolve_db_returns_unique_match_from_cache(
     tmp_path: Path, monkeypatch
 ) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
     )
     _write_cache_table(
@@ -460,7 +460,7 @@ def test_resolve_db_returns_unique_match_from_cache(
 
 def test_resolve_db_skips_missing_cache_files(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
     )
     _write_cache_table(
@@ -474,7 +474,7 @@ def test_resolve_db_skips_missing_cache_files(tmp_path: Path, monkeypatch) -> No
 
 def test_resolve_db_raises_when_code_not_found(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"),),
     )
     _write_cache_table(
@@ -492,7 +492,7 @@ def test_resolve_db_raises_when_code_found_in_multiple_dbs(
     monkeypatch,
 ) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
     )
     _write_cache_table(
@@ -525,7 +525,7 @@ def test_resolve_db_skips_cache_without_series_code_column(
     monkeypatch,
 ) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
     )
     pq.write_table(pa.table({"db": ["FM01"]}), tmp_path / "FM01.parquet")

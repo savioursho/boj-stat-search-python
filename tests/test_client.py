@@ -4,7 +4,7 @@ import httpx
 
 from boj_stat_search import BojClient
 from boj_stat_search.core.types import Code
-from boj_stat_search.models import DataResponse, MetadataResponse
+from boj_stat_search.core.models import DataResponse, MetadataResponse
 
 
 # ---------------------------------------------------------------------------
@@ -46,7 +46,7 @@ def test_context_manager_returns_self():
 
 
 def test_context_manager_closes_internal_client_on_exit():
-    with patch("boj_stat_search.client.httpx.Client") as MockClient:
+    with patch("boj_stat_search.shell.client.httpx.Client") as MockClient:
         mock_instance = MockClient.return_value
         with BojClient():
             pass
@@ -55,7 +55,7 @@ def test_context_manager_closes_internal_client_on_exit():
 
 def test_context_manager_delegates_get_metadata():
     expected = _make_metadata_response()
-    with patch("boj_stat_search.client.get_metadata", return_value=expected) as mock_fn:
+    with patch("boj_stat_search.shell.client.get_metadata", return_value=expected) as mock_fn:
         with BojClient() as c:
             result = c.get_metadata("IR01")
     mock_fn.assert_called_once_with("IR01", "raise", client=c._client)
@@ -68,7 +68,7 @@ def test_context_manager_delegates_get_metadata():
 
 
 def test_explicit_close_closes_internal_client():
-    with patch("boj_stat_search.client.httpx.Client") as MockClient:
+    with patch("boj_stat_search.shell.client.httpx.Client") as MockClient:
         mock_instance = MockClient.return_value
         c = BojClient()
         c.close()
@@ -76,7 +76,7 @@ def test_explicit_close_closes_internal_client():
 
 
 def test_close_is_idempotent_for_internal_client():
-    with patch("boj_stat_search.client.httpx.Client") as MockClient:
+    with patch("boj_stat_search.shell.client.httpx.Client") as MockClient:
         mock_instance = MockClient.return_value
         c = BojClient()
         c.close()
@@ -106,7 +106,7 @@ def test_explicit_close_does_not_close_external_client():
 def test_external_client_is_used_for_requests():
     external = Mock(spec=httpx.Client)
     expected = _make_metadata_response()
-    with patch("boj_stat_search.client.get_metadata", return_value=expected) as mock_fn:
+    with patch("boj_stat_search.shell.client.get_metadata", return_value=expected) as mock_fn:
         c = BojClient(client=external)
         result = c.get_metadata("IR01")
     mock_fn.assert_called_once_with("IR01", "raise", client=external)
@@ -120,7 +120,7 @@ def test_external_client_is_used_for_requests():
 
 def test_get_metadata_delegates_to_functional_api():
     expected = _make_metadata_response()
-    with patch("boj_stat_search.client.get_metadata", return_value=expected) as mock_fn:
+    with patch("boj_stat_search.shell.client.get_metadata", return_value=expected) as mock_fn:
         c = BojClient()
         result = c.get_metadata("IR01")
     mock_fn.assert_called_once_with("IR01", "raise", client=c._client)
@@ -135,7 +135,7 @@ def test_get_metadata_delegates_to_functional_api():
 def test_get_data_code_delegates_minimal_args():
     expected = _make_data_response()
     with patch(
-        "boj_stat_search.client.get_data_code", return_value=expected
+        "boj_stat_search.shell.client.get_data_code", return_value=expected
     ) as mock_fn:
         c = BojClient()
         result = c.get_data_code("FM01", "STRDCLUCON")
@@ -148,7 +148,7 @@ def test_get_data_code_delegates_minimal_args():
 def test_get_data_code_delegates_all_optional_args():
     expected = _make_data_response()
     with patch(
-        "boj_stat_search.client.get_data_code", return_value=expected
+        "boj_stat_search.shell.client.get_data_code", return_value=expected
     ) as mock_fn:
         c = BojClient()
         result = c.get_data_code(
@@ -168,7 +168,7 @@ def test_get_data_code_delegates_code_class_with_embedded_db():
     expected = _make_data_response()
     code = Code("FM01'STRDCLUCON")
     with patch(
-        "boj_stat_search.client.get_data_code", return_value=expected
+        "boj_stat_search.shell.client.get_data_code", return_value=expected
     ) as mock_fn:
         c = BojClient()
         result = c.get_data_code(code=code)
@@ -186,7 +186,7 @@ def test_get_data_code_delegates_code_class_with_embedded_db():
 def test_get_data_layer_delegates_minimal_args():
     expected = _make_data_response()
     with patch(
-        "boj_stat_search.client.get_data_layer", return_value=expected
+        "boj_stat_search.shell.client.get_data_layer", return_value=expected
     ) as mock_fn:
         c = BojClient()
         result = c.get_data_layer("MD10", "Q", "*")
@@ -199,7 +199,7 @@ def test_get_data_layer_delegates_minimal_args():
 def test_get_data_layer_delegates_all_optional_args():
     expected = _make_data_response()
     with patch(
-        "boj_stat_search.client.get_data_layer", return_value=expected
+        "boj_stat_search.shell.client.get_data_layer", return_value=expected
     ) as mock_fn:
         c = BojClient()
         result = c.get_data_layer(
@@ -223,7 +223,7 @@ def test_get_data_layer_delegates_all_optional_args():
 
 def test_throttle_sleeps_when_interval_not_elapsed():
     """Only 0.3 s elapsed; with min_request_interval=1.0 expects ~0.7 s sleep."""
-    with patch("boj_stat_search.client.time") as mock_time:
+    with patch("boj_stat_search.shell.client.time") as mock_time:
         # First monotonic() → _last_request_time init is 0.0 (not called yet)
         # _throttle: elapsed = monotonic() - 0.0; then sleep; then monotonic() again
         mock_time.monotonic.side_effect = [
@@ -242,7 +242,7 @@ def test_throttle_sleeps_when_interval_not_elapsed():
 
 def test_throttle_does_not_sleep_when_interval_elapsed():
     """More than 1.0 s elapsed → no sleep."""
-    with patch("boj_stat_search.client.time") as mock_time:
+    with patch("boj_stat_search.shell.client.time") as mock_time:
         mock_time.monotonic.side_effect = [1.5, 1.5]  # elapsed=1.5, update stamp
         mock_time.sleep = MagicMock()
 
@@ -254,7 +254,7 @@ def test_throttle_does_not_sleep_when_interval_elapsed():
 
 def test_throttle_disabled_when_zero():
     """min_request_interval=0 → no sleep regardless of elapsed time."""
-    with patch("boj_stat_search.client.time") as mock_time:
+    with patch("boj_stat_search.shell.client.time") as mock_time:
         mock_time.sleep = MagicMock()
 
         c = BojClient(min_request_interval=0)
@@ -266,7 +266,7 @@ def test_throttle_disabled_when_zero():
 
 def test_throttle_updates_last_request_time():
     """After _throttle(), _last_request_time is set to the second monotonic() call."""
-    with patch("boj_stat_search.client.time") as mock_time:
+    with patch("boj_stat_search.shell.client.time") as mock_time:
         mock_time.monotonic.side_effect = [2.0, 3.5]
         mock_time.sleep = MagicMock()
 
@@ -282,9 +282,9 @@ def test_throttle_applied_to_all_methods():
     data = _make_data_response()
 
     with (
-        patch("boj_stat_search.client.get_metadata", return_value=meta),
-        patch("boj_stat_search.client.get_data_code", return_value=data),
-        patch("boj_stat_search.client.get_data_layer", return_value=data),
+        patch("boj_stat_search.shell.client.get_metadata", return_value=meta),
+        patch("boj_stat_search.shell.client.get_data_code", return_value=data),
+        patch("boj_stat_search.shell.client.get_data_layer", return_value=data),
     ):
         c = BojClient(min_request_interval=0)  # disable real sleeping
         with patch.object(c, "_throttle") as mock_throttle:
@@ -307,7 +307,7 @@ def test_on_validation_error_default_is_raise():
 
 def test_on_validation_error_forwarded_to_get_metadata():
     expected = _make_metadata_response()
-    with patch("boj_stat_search.client.get_metadata", return_value=expected) as mock_fn:
+    with patch("boj_stat_search.shell.client.get_metadata", return_value=expected) as mock_fn:
         c = BojClient(on_validation_error="warn")
         c.get_metadata("IR01")
     mock_fn.assert_called_once_with("IR01", "warn", client=c._client)
@@ -316,7 +316,7 @@ def test_on_validation_error_forwarded_to_get_metadata():
 def test_on_validation_error_forwarded_to_get_data_code():
     expected = _make_data_response()
     with patch(
-        "boj_stat_search.client.get_data_code", return_value=expected
+        "boj_stat_search.shell.client.get_data_code", return_value=expected
     ) as mock_fn:
         c = BojClient(on_validation_error="ignore")
         c.get_data_code("FM01", "STRDCLUCON")
@@ -328,7 +328,7 @@ def test_on_validation_error_forwarded_to_get_data_code():
 def test_on_validation_error_forwarded_to_get_data_layer():
     expected = _make_data_response()
     with patch(
-        "boj_stat_search.client.get_data_layer", return_value=expected
+        "boj_stat_search.shell.client.get_data_layer", return_value=expected
     ) as mock_fn:
         c = BojClient(on_validation_error="warn")
         c.get_data_layer("MD10", "Q", "*")

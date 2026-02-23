@@ -1,4 +1,4 @@
-from boj_stat_search.models import DbInfo
+from boj_stat_search.core.models import DbInfo
 
 
 _DB_CATALOG: tuple[DbInfo, ...] = (

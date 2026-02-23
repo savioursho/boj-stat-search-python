@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 from typer.testing import CliRunner
 
-from boj_stat_search.catalog import MetadataExportReport
-from boj_stat_search.cli.app import app
-from boj_stat_search.models import (
+from boj_stat_search.shell.catalog import MetadataExportReport
+from boj_stat_search.shell.cli import app
+from boj_stat_search.core.models import (
     DataResponse,
     DbInfo,
     MetadataEntry,
@@ -86,7 +86,7 @@ _FAKE_EXPORT_REPORT_FAILURE = MetadataExportReport(
 
 class TestListDb:
     def test_output_contains_db_names(self) -> None:
-        with patch("boj_stat_search.cli.app.list_db", return_value=_FAKE_DB_LIST):
+        with patch("boj_stat_search.shell.cli.list_db", return_value=_FAKE_DB_LIST):
             result = runner.invoke(app, ["list-db"])
         assert result.exit_code == 0
         assert "FM01" in result.output
@@ -94,7 +94,7 @@ class TestListDb:
         assert "Financial Markets" in result.output
 
     def test_output_contains_descriptions(self) -> None:
-        with patch("boj_stat_search.cli.app.list_db", return_value=_FAKE_DB_LIST):
+        with patch("boj_stat_search.shell.cli.list_db", return_value=_FAKE_DB_LIST):
             result = runner.invoke(app, ["list-db"])
         assert "Uncollateralized Overnight Call Rate" in result.output
         assert "Basic Discount Rates" in result.output
@@ -103,7 +103,7 @@ class TestListDb:
 class TestGetMetadata:
     def test_success_json_output(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.get_metadata",
+            "boj_stat_search.shell.cli.get_metadata",
             return_value=_FAKE_METADATA_RESPONSE,
         ):
             result = runner.invoke(app, ["get-metadata", "FM01"])
@@ -121,10 +121,10 @@ class TestShowLayers:
     def test_success(self) -> None:
         with (
             patch(
-                "boj_stat_search.cli.app.get_metadata",
+                "boj_stat_search.shell.cli.get_metadata",
                 return_value=_FAKE_METADATA_RESPONSE,
             ),
-            patch("boj_stat_search.cli.app.show_layers") as mock_show,
+            patch("boj_stat_search.shell.cli.show_layers") as mock_show,
         ):
             result = runner.invoke(app, ["show-layers", "FM01"])
         assert result.exit_code == 0
@@ -133,10 +133,10 @@ class TestShowLayers:
     def test_with_layer_option(self) -> None:
         with (
             patch(
-                "boj_stat_search.cli.app.get_metadata",
+                "boj_stat_search.shell.cli.get_metadata",
                 return_value=_FAKE_METADATA_RESPONSE,
             ),
-            patch("boj_stat_search.cli.app.show_layers") as mock_show,
+            patch("boj_stat_search.shell.cli.show_layers") as mock_show,
         ):
             result = runner.invoke(app, ["show-layers", "FM01", "--layer", "1"])
         assert result.exit_code == 0
@@ -146,7 +146,7 @@ class TestShowLayers:
 class TestGetDataCode:
     def test_success_json_output(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.get_data_code",
+            "boj_stat_search.shell.cli.get_data_code",
             return_value=_FAKE_DATA_RESPONSE,
         ):
             result = runner.invoke(app, ["get-data-code", "FM01", "FM01'STRDCLUCON"])
@@ -156,7 +156,7 @@ class TestGetDataCode:
 
     def test_with_options(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.get_data_code",
+            "boj_stat_search.shell.cli.get_data_code",
             return_value=_FAKE_DATA_RESPONSE,
         ) as mock_fn:
             result = runner.invoke(
@@ -190,7 +190,7 @@ class TestGetDataCode:
 class TestGetDataLayer:
     def test_success_json_output(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.get_data_layer",
+            "boj_stat_search.shell.cli.get_data_layer",
             return_value=_FAKE_DATA_RESPONSE,
         ):
             result = runner.invoke(app, ["get-data-layer", "FM01", "D", "1,*"])
@@ -200,7 +200,7 @@ class TestGetDataLayer:
 
     def test_with_options(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.get_data_layer",
+            "boj_stat_search.shell.cli.get_data_layer",
             return_value=_FAKE_DATA_RESPONSE,
         ) as mock_fn:
             result = runner.invoke(
@@ -236,7 +236,7 @@ class TestGetDataLayer:
 class TestGenerateMetadataParquet:
     def test_success(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.generate_metadata_parquet_files",
+            "boj_stat_search.shell.cli.generate_metadata_parquet_files",
             return_value=_FAKE_EXPORT_REPORT_SUCCESS,
         ) as mock_fn:
             result = runner.invoke(
@@ -270,7 +270,7 @@ class TestGenerateMetadataParquet:
 
     def test_failure_exits_non_zero(self) -> None:
         with patch(
-            "boj_stat_search.cli.app.generate_metadata_parquet_files",
+            "boj_stat_search.shell.cli.generate_metadata_parquet_files",
             return_value=_FAKE_EXPORT_REPORT_FAILURE,
         ) as mock_fn:
             result = runner.invoke(app, ["generate-metadata-parquet"])

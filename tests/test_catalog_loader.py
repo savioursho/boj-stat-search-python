@@ -10,13 +10,13 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from boj_stat_search.catalog.loader import (
+from boj_stat_search.shell.catalog.loader import (
     CatalogCacheError,
     CatalogFetchError,
     load_catalog_all,
     load_catalog_db,
 )
-from boj_stat_search.models import DbInfo
+from boj_stat_search.core.models import DbInfo
 
 
 def _parquet_bytes(rows: list[dict[str, str]]) -> bytes:
@@ -149,7 +149,7 @@ def test_load_catalog_all_merges_requested_dbs(tmp_path: Path) -> None:
 
 def test_load_catalog_all_defaults_to_list_db(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.loader.list_db",
+        "boj_stat_search.shell.catalog.loader.list_db",
         lambda: (
             DbInfo(name="FM01", desc="desc", category="cat"),
             DbInfo(name="BP01", desc="desc", category="cat"),
@@ -204,7 +204,7 @@ def test_load_catalog_all_reuses_one_internal_client(
         _mock_response(_parquet_bytes([{"series_code": "BP_CODE"}])),
     ]
     factory = Mock(return_value=internal_client)
-    monkeypatch.setattr("boj_stat_search.catalog.loader.httpx.Client", factory)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.loader.httpx.Client", factory)
 
     load_catalog_all(dbs=["FM01", "BP01"], cache_dir=tmp_path)
 

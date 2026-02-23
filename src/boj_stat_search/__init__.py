@@ -1,5 +1,5 @@
-from boj_stat_search.client import BojClient
-from boj_stat_search.api import (
+from boj_stat_search.shell.client import BojClient
+from boj_stat_search.shell.api import (
     BojApiError,
     get_data_code,
     get_data_code_raw,
@@ -8,21 +8,25 @@ from boj_stat_search.api import (
     get_metadata,
     get_metadata_raw,
 )
-from boj_stat_search.catalog import (
+from boj_stat_search.shell.catalog.exporter import (
+    MetadataExportReport,
+    generate_metadata_parquet_files,
+)
+from boj_stat_search.shell.catalog.loader import (
     CatalogCacheError,
     CatalogError,
     CatalogFetchError,
-    MetadataExportReport,
-    generate_metadata_parquet_files,
-    list_series,
     load_catalog_all,
     load_catalog_db,
+)
+from boj_stat_search.shell.catalog.search import (
+    list_series,
     resolve_db,
     search_series,
 )
 from boj_stat_search.core import Code, Frequency, Layer, Period, list_db
-from boj_stat_search.display import show_layers
-from boj_stat_search.models import (
+from boj_stat_search.shell.display import show_layers
+from boj_stat_search.core.models import (
     BaseResponse,
     DataResponse,
     DbInfo,
@@ -66,6 +70,6 @@ __all__ = [
 
 
 def main() -> None:
-    from boj_stat_search.cli.app import app
+    from boj_stat_search.shell.cli import app
 
     app()

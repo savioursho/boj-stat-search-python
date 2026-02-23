@@ -1,61 +1,71 @@
-# Two-Layer API Architecture — Contributor Guide
+# Functional Core / Imperative Shell Architecture
 
-This document explains how the two-layer API architecture affects where new code should be added.
+This project follows the Functional Core / Imperative Shell pattern at the
+directory level.
 
-## Layer Responsibilities
+## Directory Structure
 
-### Low-Level API
+```text
+src/boj_stat_search/
+├── __init__.py
+├── core/
+│   ├── __init__.py
+│   ├── models/
+│   │   └── __init__.py
+│   ├── database.py
+│   ├── formatter.py
+│   ├── parser.py
+│   ├── types.py
+│   ├── url_builder.py
+│   └── validator.py
+└── shell/
+    ├── __init__.py
+    ├── api.py
+    ├── client.py
+    ├── catalog/
+    │   ├── __init__.py
+    │   ├── exporter.py
+    │   ├── loader.py
+    │   └── search.py
+    ├── display.py
+    └── cli.py
+```
 
-A faithful, thin wrapper around the original BOJ API.
+## Boundary Rules
 
-- Input parameters mirror the raw API (plain strings, no value objects).
-- Output structure mirrors the raw API response shape.
-- No validation, no pagination handling, no multi-request resolution.
-- Purpose: provide a stable, predictable 1-to-1 mapping to the upstream API.
+`core/`:
+- Pure logic only.
+- No side effects.
+- No HTTP, file I/O, console output, or mutable runtime state.
+- Includes value objects, parsers, validators, formatting, URL builders, and
+  pure data models.
 
-### High-Level API
+`shell/`:
+- Side effects only.
+- Handles HTTP requests, file reads/writes, console output, and stateful
+  clients.
+- Should delegate decisions and transformations to `core/`.
 
-A user-facing layer that adds convenience and safety.
+Dependency direction:
+- `shell/` may import `core/`.
+- `core/` must never import `shell/`.
 
-- Accepts value objects (`Frequency`, `Layer`, `Period`) for validation and normalization.
-- Automatic pagination (fetches all pages transparently).
-- Transparent multi-request resolution: query patterns that require multiple API calls under the hood are handled automatically so the caller makes a single function call.
-- Purpose: let users focus on *what* data they want, not *how* to retrieve it.
+## Placement Guide
 
-## Dependency Direction
+Use this checklist when adding code:
 
-- High-level depends on low-level. **Never the reverse.**
-- Both layers are part of the public API — users can choose whichever suits their needs.
-
-## Where Does New Code Go?
-
-Use this checklist when adding or modifying functionality:
-
-| Change type | Target layer |
+| Change type | Location |
 |---|---|
-| New upstream API parameter passthrough | Low-level |
-| New response field passthrough | Low-level |
-| New convenience helper (auto-pagination, multi-request, etc.) | High-level |
-| New value object or enum | High-level |
-| New validation rule | High-level |
-| New `BojClient` method | High-level |
-| New CLI subcommand | High-level (CLI wraps high-level functions) |
-| Bug fix in raw API mapping | Low-level |
-| Bug fix in validation or convenience logic | High-level |
+| New validation/type/normalization logic | `core/` |
+| New parsing or response-shape mapping logic | `core/` |
+| New pure formatting utility | `core/` |
+| New HTTP endpoint integration | `shell/api.py` |
+| New file cache/export behavior | `shell/catalog/` |
+| New client/session behavior | `shell/client.py` |
+| New CLI command | `shell/cli.py` |
+| New terminal display behavior (`print`) | `shell/display.py` |
 
-## API Styles per Layer
+## Practical Decision Criterion
 
-| Layer | Functional API | Client API (`BojClient`) | CLI |
-|---|---|---|---|
-| Low-level | Yes | — | — |
-| High-level | Yes | Yes | Yes |
-
-The client API adds HTTP connection reuse and automatic throttling, which are primarily useful in batch workflows where the high-level API is the natural choice.
-
-The CLI tracks the high-level functional API. Each CLI subcommand is a thin wrapper that parses arguments, calls the corresponding high-level function, and formats the output. Low-level API features are not exposed through the CLI — users who need that level of control are expected to use the Python API directly.
-
-## Key Principles
-
-1. **Keep the low-level layer stable.** Changes should track upstream API changes only.
-2. **Add convenience in the high-level layer.** If you're adding validation, pagination, or multi-request logic, it belongs in the high-level layer.
-3. **Respect the dependency direction.** High-level imports low-level. Low-level must never import from high-level.
+If importing and calling the module causes no observable effect on the outside
+world, it belongs in `core/`. Otherwise it belongs in `shell/`.

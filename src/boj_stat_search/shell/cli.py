@@ -4,10 +4,10 @@ from typing import Annotated, Optional
 
 import typer
 
-from boj_stat_search.api import BojApiError, get_data_code, get_data_layer, get_metadata
-from boj_stat_search.catalog import generate_metadata_parquet_files
+from boj_stat_search.shell.api import BojApiError, get_data_code, get_data_layer, get_metadata
+from boj_stat_search.shell.catalog.exporter import generate_metadata_parquet_files
 from boj_stat_search.core import list_db
-from boj_stat_search.display import show_layers
+from boj_stat_search.shell.display import show_layers
 
 app = typer.Typer(
     help="Query Bank of Japan Time Series Statistical Data from the terminal."
