@@ -1,6 +1,6 @@
 import boj_stat_search as bss
 
-from boj_stat_search.api import (
+from boj_stat_search.shell.api import (
     BojApiError as ApiBojApiError,
     get_data_code as api_get_data_code,
     get_data_code_raw as api_get_data_code_raw,
@@ -9,7 +9,7 @@ from boj_stat_search.api import (
     get_metadata as api_get_metadata,
     get_metadata_raw as api_get_metadata_raw,
 )
-from boj_stat_search.catalog import (
+from boj_stat_search.shell.catalog import (
     CatalogCacheError as CatalogCatalogCacheError,
     CatalogError as CatalogCatalogError,
     CatalogFetchError as CatalogCatalogFetchError,
@@ -25,8 +25,8 @@ from boj_stat_search.core import Code as CoreCode
 from boj_stat_search.core import Frequency as CoreFrequency
 from boj_stat_search.core import Layer as CoreLayer
 from boj_stat_search.core import Period as CorePeriod
-from boj_stat_search.display import show_layers as display_show_layers
-from boj_stat_search.models import (
+from boj_stat_search.shell.display import show_layers as display_show_layers
+from boj_stat_search.core.models import (
     BaseResponse as ModelsBaseResponse,
     DataResponse as ModelsDataResponse,
     MetadataEntry as ModelsMetadataEntry,

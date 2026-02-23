@@ -10,9 +10,9 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from tqdm import tqdm
 
-from boj_stat_search.client import BojClient
+from boj_stat_search.shell.client import BojClient
 from boj_stat_search.core import list_db
-from boj_stat_search.models import MetadataEntry
+from boj_stat_search.core.models import MetadataEntry
 
 METADATA_PARQUET_COLUMNS: tuple[str, ...] = (
     "series_code",

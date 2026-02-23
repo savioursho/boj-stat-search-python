@@ -1,5 +1,5 @@
 from boj_stat_search.core.types import Layer
-from boj_stat_search.models import MetadataEntry
+from boj_stat_search.core.models import MetadataEntry
 
 
 _MAX_LAYER_DEPTH = 5

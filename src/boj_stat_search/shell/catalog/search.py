@@ -8,7 +8,7 @@ import httpx
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from boj_stat_search.catalog.loader import (
+from boj_stat_search.shell.catalog.loader import (
     DEFAULT_CACHE_TTL_SECONDS,
     DEFAULT_CATALOG_REF,
     DEFAULT_CATALOG_REPO,
@@ -20,7 +20,7 @@ from boj_stat_search.catalog.loader import (
 )
 from boj_stat_search.core import Layer, list_db
 from boj_stat_search.core.validator import coerce_layer
-from boj_stat_search.models import SeriesCatalogEntry
+from boj_stat_search.core.models import SeriesCatalogEntry
 
 _SEARCH_FIELDS: tuple[str, ...] = ("name_j", "name_en", "category_j", "category_en")
 _REQUIRED_COLUMNS: tuple[str, ...] = (

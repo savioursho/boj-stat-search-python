@@ -2,9 +2,9 @@ import time
 
 import httpx
 
-from boj_stat_search.api.api_request import get_data_code, get_data_layer, get_metadata
+from boj_stat_search.shell.api import get_data_code, get_data_layer, get_metadata
 from boj_stat_search.core.types import Code, ErrorMode, Frequency, Layer, Period
-from boj_stat_search.models import DataResponse, MetadataResponse
+from boj_stat_search.core.models import DataResponse, MetadataResponse
 
 
 class BojClient:

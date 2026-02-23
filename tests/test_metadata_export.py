@@ -5,13 +5,13 @@ from typing import Any
 
 import pyarrow.parquet as pq
 
-from boj_stat_search.catalog import (
+from boj_stat_search.shell.catalog import (
     METADATA_PARQUET_COLUMNS,
     generate_metadata_parquet_files,
     metadata_entries_to_rows,
     write_metadata_parquet,
 )
-from boj_stat_search.models import MetadataEntry, MetadataResponse
+from boj_stat_search.core.models import MetadataEntry, MetadataResponse
 
 
 def _make_entry(
@@ -175,7 +175,7 @@ def test_generate_metadata_parquet_files_writes_files_and_is_idempotent(
         return client
 
     monkeypatch.setattr(
-        "boj_stat_search.catalog.exporter.BojClient", fake_client_factory
+        "boj_stat_search.shell.catalog.exporter.BojClient", fake_client_factory
     )
 
     output_dir = tmp_path / "metadata"
@@ -233,7 +233,7 @@ def test_generate_metadata_parquet_files_continues_on_failures_and_reports_them(
         return _FakeClient(responses, min_request_interval=min_request_interval)
 
     monkeypatch.setattr(
-        "boj_stat_search.catalog.exporter.BojClient", fake_client_factory
+        "boj_stat_search.shell.catalog.exporter.BojClient", fake_client_factory
     )
 
     output_dir = tmp_path / "metadata"
@@ -290,9 +290,9 @@ def test_generate_metadata_parquet_files_uses_tqdm_when_show_progress_enabled(
         return progress
 
     monkeypatch.setattr(
-        "boj_stat_search.catalog.exporter.BojClient", fake_client_factory
+        "boj_stat_search.shell.catalog.exporter.BojClient", fake_client_factory
     )
-    monkeypatch.setattr("boj_stat_search.catalog.exporter.tqdm", fake_tqdm)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.exporter.tqdm", fake_tqdm)
 
     report = generate_metadata_parquet_files(
         output_dir=tmp_path / "metadata",
