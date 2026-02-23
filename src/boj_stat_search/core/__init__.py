@@ -11,7 +11,7 @@ from boj_stat_search.core.parser import (
     parse_data_code_response,
     parse_metadata_response,
 )
-from boj_stat_search.core.types import Code, ErrorMode, Frequency, Layer, Period
+from boj_stat_search.core.types import Code, Db, ErrorMode, Frequency, Layer, Period
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -38,6 +38,7 @@ __all__ = [
     "format_layer_tree",
     "parse_data_code_response",
     "parse_metadata_response",
+    "Db",
     "Frequency",
     "Layer",
     "Code",
