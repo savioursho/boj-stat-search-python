@@ -1,5 +1,5 @@
-from boj_stat_search.display import show_layers
-from boj_stat_search.models import MetadataEntry
+from boj_stat_search.shell.display import show_layers
+from boj_stat_search.core.models import MetadataEntry
 
 
 def _entry(

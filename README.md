@@ -74,7 +74,9 @@ print(len(series))
 
 ## Documentation
 
+- [Documentation Home](./docs/README.md)
 - [User Guide](./docs/user_guide/README.md)
+- [Development Guide](./docs/development_guide/README.md)
 - [Metadata Licensing Determination](./docs/development_guide/metadata_licensing.md)
 
 ## Official Resources

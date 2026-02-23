@@ -10,6 +10,15 @@
 - Tests: `tests/` (`test_api_request.py`, `test_parser.py`, `test_url_builder.py`, `test_validator.py`).
 - Reference docs and experiments: `notes/` and `docs/` (not production code).
 
+## Development Guide Docs
+
+- Entry point: `docs/development_guide/README.md`.
+- Architecture boundary and placement rules: `docs/development_guide/architecture.md`.
+- Test strategy and target test layout (`tests/core/`, `tests/shell/`): `docs/development_guide/testing.md`.
+- Release flow and branch policy: `docs/development_guide/release_process.md`.
+- Metadata redistribution/compliance notes: `docs/development_guide/metadata_licensing.md`.
+- When changing module placement, testing approach, release workflow, or metadata handling, update the corresponding development guide doc in the same PR.
+
 ## Build, Test, and Development Commands
 
 - Install/sync environment: `uv sync`

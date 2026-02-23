@@ -1,6 +1,6 @@
 from typing import Any
 
-from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
+from boj_stat_search.core.models import DataResponse, MetadataEntry, MetadataResponse
 
 
 def _parse_metadata_entry(raw: dict[str, Any]) -> MetadataEntry:

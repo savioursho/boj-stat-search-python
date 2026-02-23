@@ -1,5 +1,7 @@
 # Metadata Licensing Determination
 
+Part of the [Development Guide](./README.md).
+
 ## Scope
 
 This note documents whether this repository can redistribute BOJ Stat-Search

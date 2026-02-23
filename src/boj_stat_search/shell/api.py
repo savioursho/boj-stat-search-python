@@ -1,12 +1,12 @@
 import httpx
 from typing import Any
 
-from boj_stat_search.models import DataResponse, MetadataResponse
+from boj_stat_search.core.models import DataResponse, MetadataResponse
 from boj_stat_search.core.parser import (
     parse_data_code_response,
     parse_metadata_response,
 )
-from boj_stat_search.core.types import Code, ErrorMode, Frequency, Layer, Period
+from boj_stat_search.core.types import Code, Db, ErrorMode, Frequency, Layer, Period
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -100,7 +100,7 @@ def _get_json(url: str, *, client: httpx.Client | None = None) -> dict[str, Any]
 
 
 def get_metadata_raw(
-    db: str,
+    db: Db | str,
     on_validation_error: ErrorMode = "raise",
     *,
     client: httpx.Client | None = None,
@@ -113,7 +113,7 @@ def get_metadata_raw(
 
 
 def get_metadata(
-    db: str,
+    db: Db | str,
     on_validation_error: ErrorMode = "raise",
     *,
     client: httpx.Client | None = None,
@@ -127,7 +127,7 @@ def get_metadata(
 
 
 def get_data_code_raw(
-    db: str | None = None,
+    db: Db | str | None = None,
     code: Code | str | None = None,
     start_date: Period | str | None = None,
     end_date: Period | str | None = None,
@@ -145,7 +145,7 @@ def get_data_code_raw(
         )
         if first_code:
             try:
-                from boj_stat_search.catalog.search import resolve_db
+                from boj_stat_search.shell.catalog.search import resolve_db
 
                 db = resolve_db(first_code)
             except Exception:
@@ -163,7 +163,7 @@ def get_data_code_raw(
 
 
 def get_data_code(
-    db: str | None = None,
+    db: Db | str | None = None,
     code: Code | str | None = None,
     start_date: Period | str | None = None,
     end_date: Period | str | None = None,
@@ -185,7 +185,7 @@ def get_data_code(
 
 
 def get_data_layer_raw(
-    db: str,
+    db: Db | str,
     frequency: Frequency | str,
     layer: Layer | str,
     start_date: Period | str | None = None,
@@ -208,7 +208,7 @@ def get_data_layer_raw(
 
 
 def get_data_layer(
-    db: str,
+    db: Db | str,
     frequency: Frequency | str,
     layer: Layer | str,
     start_date: Period | str | None = None,

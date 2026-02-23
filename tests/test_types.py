@@ -1,6 +1,21 @@
 import pytest
 
-from boj_stat_search.core.types import Code, Frequency, Period
+from boj_stat_search.core.database import _DB_CATALOG
+from boj_stat_search.core.types import Code, Db, Frequency, Period
+
+
+def test_db_is_str_enum():
+    assert Db.FM01 == "FM01"
+    assert isinstance(Db.FM01, str)
+
+
+def test_db_member_count():
+    assert len(Db) == 50
+
+
+def test_db_members_match_catalog():
+    catalog_names = {info.name for info in _DB_CATALOG}
+    assert {member.value for member in Db} == catalog_names
 
 
 def test_period_year_constructor_returns_expected_value():

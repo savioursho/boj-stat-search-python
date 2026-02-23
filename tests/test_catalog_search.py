@@ -9,9 +9,15 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from boj_stat_search.catalog import CatalogError, list_series, resolve_db, search_series
+from boj_stat_search.shell.catalog import (
+    CatalogCacheError,
+    CatalogError,
+    list_series,
+    resolve_db,
+    search_series,
+)
 from boj_stat_search.core import Layer
-from boj_stat_search.models import SeriesCatalogEntry
+from boj_stat_search.core.models import SeriesCatalogEntry
 
 
 def _make_row(
@@ -57,7 +63,7 @@ def _table(rows: list[dict[str, str | int]]) -> pa.Table:
 
 def test_search_series_matches_japanese_keyword(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -84,7 +90,7 @@ def test_search_series_matches_japanese_keyword(monkeypatch) -> None:
 
 def test_search_series_matches_english_keyword_case_insensitive(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -110,7 +116,7 @@ def test_search_series_matches_english_keyword_case_insensitive(monkeypatch) -> 
 
 def test_search_series_matches_category_fields(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -152,8 +158,10 @@ def test_search_series_with_db_uses_load_catalog_db(monkeypatch) -> None:
         )
     )
     load_all = Mock()
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_all", load_all)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.load_catalog_all", load_all
+    )
 
     results = search_series("call", db="FM01")
 
@@ -182,8 +190,10 @@ def test_search_series_with_dbs_uses_load_catalog_all(monkeypatch) -> None:
         )
     )
     load_db = Mock()
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_all", load_all)
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.load_catalog_all", load_all
+    )
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     results = search_series("rate", dbs=["FM01", "BP01", "FM01"])
 
@@ -201,8 +211,10 @@ def test_search_series_rejects_db_and_dbs_together() -> None:
 def test_search_series_returns_empty_for_empty_dbs(monkeypatch) -> None:
     load_all = Mock()
     load_db = Mock()
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_all", load_all)
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.load_catalog_all", load_all
+    )
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     results = search_series("rate", dbs=[])
 
@@ -218,7 +230,7 @@ def test_search_series_rejects_unknown_db() -> None:
 
 def test_search_series_filters_by_layer_prefix_and_wildcard(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -259,7 +271,7 @@ def test_search_series_filters_by_layer_prefix_and_wildcard(monkeypatch) -> None
 
 def test_search_series_accepts_layer_object(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: _table(
             [
                 _make_row(
@@ -312,7 +324,7 @@ def test_search_series_forwards_cache_and_client_options(monkeypatch) -> None:
             ]
         )
     )
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     client = Mock(spec=httpx.Client)
     cache_dir = Path("/tmp/catalog-cache")
@@ -340,7 +352,7 @@ def test_search_series_forwards_cache_and_client_options(monkeypatch) -> None:
 
 def test_search_series_raises_catalog_error_when_columns_missing(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_all",
+        "boj_stat_search.shell.catalog.search.load_catalog_all",
         lambda **_: pa.table({"series_code": ["FM01'A"]}),
     )
 
@@ -367,7 +379,7 @@ def test_list_series_returns_all_rows_for_db(monkeypatch) -> None:
             ]
         )
     )
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     results = list_series("FM08")
 
@@ -394,7 +406,7 @@ def test_list_series_forwards_cache_and_client_options(monkeypatch) -> None:
             ]
         )
     )
-    monkeypatch.setattr("boj_stat_search.catalog.search.load_catalog_db", load_db)
+    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     client = Mock(spec=httpx.Client)
     cache_dir = Path("/tmp/catalog-cache")
@@ -421,7 +433,7 @@ def test_list_series_forwards_cache_and_client_options(monkeypatch) -> None:
 
 def test_list_series_raises_catalog_error_when_columns_missing(monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.load_catalog_db",
+        "boj_stat_search.shell.catalog.search.load_catalog_db",
         lambda *_, **__: pa.table({"series_code": ["FM01'A"]}),
     )
 
@@ -441,7 +453,7 @@ def test_resolve_db_returns_unique_match_from_cache(
     tmp_path: Path, monkeypatch
 ) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
     )
     _write_cache_table(
@@ -460,7 +472,7 @@ def test_resolve_db_returns_unique_match_from_cache(
 
 def test_resolve_db_skips_missing_cache_files(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
     )
     _write_cache_table(
@@ -474,7 +486,7 @@ def test_resolve_db_skips_missing_cache_files(tmp_path: Path, monkeypatch) -> No
 
 def test_resolve_db_raises_when_code_not_found(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"),),
     )
     _write_cache_table(
@@ -492,7 +504,7 @@ def test_resolve_db_raises_when_code_found_in_multiple_dbs(
     monkeypatch,
 ) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
     )
     _write_cache_table(
@@ -510,6 +522,44 @@ def test_resolve_db_raises_when_code_found_in_multiple_dbs(
         resolve_db("DUP", cache_dir=tmp_path)
 
 
+def test_resolve_db_raises_cache_error_when_no_cache_files(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+
+    with pytest.raises(CatalogCacheError, match="no cached catalog files found"):
+        resolve_db("ANY", cache_dir=tmp_path)
+
+
+def test_resolve_db_raises_cache_error_when_cache_dir_missing(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+    nonexistent = tmp_path / "does_not_exist"
+
+    with pytest.raises(CatalogCacheError, match="no cached catalog files found"):
+        resolve_db("ANY", cache_dir=nonexistent)
+
+
+def test_resolve_db_raises_cache_error_when_all_caches_lack_series_code(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+    pq.write_table(pa.table({"db": ["FM01"]}), tmp_path / "FM01.parquet")
+
+    with pytest.raises(CatalogCacheError, match="no cached catalog files found"):
+        resolve_db("ANY", cache_dir=tmp_path)
+
+
 def test_resolve_db_rejects_non_string_series_code() -> None:
     with pytest.raises(ValueError, match="non-empty string"):
         resolve_db(123)  # type: ignore[arg-type]
@@ -525,7 +575,7 @@ def test_resolve_db_skips_cache_without_series_code_column(
     monkeypatch,
 ) -> None:
     monkeypatch.setattr(
-        "boj_stat_search.catalog.search.list_db",
+        "boj_stat_search.shell.catalog.search.list_db",
         lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
     )
     pq.write_table(pa.table({"db": ["FM01"]}), tmp_path / "FM01.parquet")
@@ -536,3 +586,43 @@ def test_resolve_db_skips_cache_without_series_code_column(
     )
 
     assert resolve_db("TARGET", cache_dir=tmp_path) == "BP01"
+
+
+def test_resolve_db_skips_corrupted_cache_and_finds_match_in_later_db(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
+    )
+    (tmp_path / "FM01.parquet").write_bytes(b"not a parquet file")
+    _write_cache_table(
+        tmp_path,
+        "BP01",
+        [{"series_code": "TARGET"}],
+    )
+
+    with pytest.warns(
+        UserWarning, match="resolve_db: skipping unreadable cache file for FM01"
+    ):
+        result = resolve_db("TARGET", cache_dir=tmp_path)
+
+    assert result == "BP01"
+
+
+def test_resolve_db_warns_on_corrupted_cache_file(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+    (tmp_path / "FM01.parquet").write_bytes(b"garbage")
+
+    with pytest.warns(
+        UserWarning, match="resolve_db: skipping unreadable cache file for FM01"
+    ):
+        with pytest.raises(CatalogCacheError, match="no cached catalog files found"):
+            resolve_db("ANY", cache_dir=tmp_path)

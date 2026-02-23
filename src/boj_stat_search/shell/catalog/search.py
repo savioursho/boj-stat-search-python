@@ -1,49 +1,34 @@
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
 
 import httpx
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from boj_stat_search.catalog.loader import (
+from boj_stat_search.shell.catalog.loader import (
     DEFAULT_CACHE_TTL_SECONDS,
     DEFAULT_CATALOG_REF,
     DEFAULT_CATALOG_REPO,
     DEFAULT_METADATA_DIR,
     _cache_file_path,
+    CatalogCacheError,
     CatalogError,
     load_catalog_all,
     load_catalog_db,
 )
-from boj_stat_search.core import Layer, list_db
+from boj_stat_search.core import (
+    Layer,
+    list_db,
+    resolve_db_from_tables as _core_resolve_db_from_tables,
+    table_to_entries as _core_table_to_entries,
+)
 from boj_stat_search.core.validator import coerce_layer
-from boj_stat_search.models import SeriesCatalogEntry
+from boj_stat_search.core.models import SeriesCatalogEntry
 
 _SEARCH_FIELDS: tuple[str, ...] = ("name_j", "name_en", "category_j", "category_en")
-_REQUIRED_COLUMNS: tuple[str, ...] = (
-    "db",
-    "series_code",
-    "name_j",
-    "name_en",
-    "unit_j",
-    "unit_en",
-    "frequency",
-    "category_j",
-    "category_en",
-    "layer1",
-    "layer2",
-    "layer3",
-    "layer4",
-    "layer5",
-    "start_of_time_series",
-    "end_of_time_series",
-    "last_update",
-    "notes_j",
-    "notes_en",
-)
 
 
 def search_series(
@@ -146,37 +131,34 @@ def resolve_db(
     if normalized_series_code == "":
         raise ValueError("series_code: must be a non-empty string")
 
-    matched_dbs: list[str] = []
+    tables: list[tuple[str, pa.Table]] = []
     for db_info in list_db():
         db_name = db_info.name
         cache_path = _cache_file_path(db_name, cache_dir=cache_dir)
         if not cache_path.exists():
             continue
 
-        table = pq.read_table(cache_path)
+        try:
+            table = pq.read_table(cache_path)
+        except Exception as exc:
+            warnings.warn(
+                f"resolve_db: skipping unreadable cache file for {db_name} "
+                f"at {cache_path}: {exc}",
+                stacklevel=2,
+            )
+            continue
         if "series_code" not in table.column_names:
             continue
 
-        match_mask = pa.array(
-            [
-                value == normalized_series_code
-                for value in table["series_code"].to_pylist()
-            ]
-        )
-        matched = table.filter(match_mask)
-        if matched.num_rows > 0:
-            matched_dbs.append(db_name)
+        tables.append((db_name, table))
 
-    if len(matched_dbs) == 1:
-        return matched_dbs[0]
-    if len(matched_dbs) == 0:
-        raise ValueError(
-            "resolve_db: series code not found in any cached catalog; "
-            "specify db explicitly or run load_catalog_all() to populate cache"
+    if not tables:
+        raise CatalogCacheError(
+            "resolve_db: no cached catalog files found; "
+            "run load_catalog_all() to populate cache"
         )
-    raise ValueError(
-        "resolve_db: series code found in multiple DBs; specify db explicitly"
-    )
+
+    return _core_resolve_db_from_tables(normalized_series_code, tables)
 
 
 def _normalize_keyword(keyword: str) -> str:
@@ -281,58 +263,7 @@ def _row_matches_keyword(row: SeriesCatalogEntry, normalized_keyword: str) -> bo
 
 
 def _table_to_entries(table: pa.Table) -> tuple[SeriesCatalogEntry, ...]:
-    _ensure_required_columns(table.column_names)
-
-    entries: list[SeriesCatalogEntry] = []
-    for row in table.to_pylist():
-        entries.append(_row_to_entry(row))
-    return tuple(entries)
-
-
-def _ensure_required_columns(column_names: list[str]) -> None:
-    missing = [column for column in _REQUIRED_COLUMNS if column not in column_names]
-    if missing:
-        raise CatalogError(
-            "Catalog table is missing required columns: " + ", ".join(missing)
-        )
-
-
-def _row_to_entry(row: dict[str, Any]) -> SeriesCatalogEntry:
     try:
-        return SeriesCatalogEntry(
-            db=_required_str(row, "db"),
-            series_code=_required_str(row, "series_code"),
-            name_j=_required_str(row, "name_j"),
-            name_en=_required_str(row, "name_en"),
-            unit_j=_required_str(row, "unit_j"),
-            unit_en=_required_str(row, "unit_en"),
-            frequency=_required_str(row, "frequency"),
-            category_j=_required_str(row, "category_j"),
-            category_en=_required_str(row, "category_en"),
-            layer1=_required_int(row, "layer1"),
-            layer2=_required_int(row, "layer2"),
-            layer3=_required_int(row, "layer3"),
-            layer4=_required_int(row, "layer4"),
-            layer5=_required_int(row, "layer5"),
-            start_of_time_series=_required_str(row, "start_of_time_series"),
-            end_of_time_series=_required_str(row, "end_of_time_series"),
-            last_update=_required_str(row, "last_update"),
-            notes_j=_required_str(row, "notes_j"),
-            notes_en=_required_str(row, "notes_en"),
-        )
+        return _core_table_to_entries(table)
     except ValueError as exc:
-        raise CatalogError("Catalog row contains invalid values") from exc
-
-
-def _required_str(row: dict[str, Any], field: str) -> str:
-    value = row[field]
-    if not isinstance(value, str):
-        raise ValueError(f"{field}: must be a string")
-    return value
-
-
-def _required_int(row: dict[str, Any], field: str) -> int:
-    value = row[field]
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{field}: must be an integer")
-    return value
+        raise CatalogError(str(exc)) from exc

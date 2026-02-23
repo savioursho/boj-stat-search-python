@@ -16,10 +16,11 @@ The package can be used in three ways:
 
 ## Guide Map
 
-1. [Getting Started](./getting_started.md)
-2. [Querying Data](./querying_data.md)
-3. [Layer Tree Display](./layer_tree_display.md)
-4. [Command-Line Interface](./cli.md)
+1. [Architecture](./architecture.md)
+2. [Getting Started](./getting_started.md)
+3. [Querying Data](./querying_data.md)
+4. [Layer Tree Display](./layer_tree_display.md)
+5. [Command-Line Interface](./cli.md)
 
 ## Coverage
 
