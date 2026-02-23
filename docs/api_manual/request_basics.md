@@ -29,6 +29,10 @@ Endpoint-specific parameters:
   - `startDate`, `endDate` (optional)
   - `startPosition` (optional, integer >= 1)
 
+> Note for `boj_stat_search` users: this page documents the raw BOJ API, where `db` is required.
+> The Python wrapper adds optional conveniences for `get_data_code` (for example `Code("DB'CODE")` input and cache-based DB resolution when `db` is omitted).
+> See [User Guide: Querying Data](../user_guide/querying_data.md).
+
 ## Date Format Rules
 
 From the official manual:

@@ -48,6 +48,26 @@ print(len(metadata.result_set))
 - `db`: database name returned by the API
 - `result_set`: metadata entries
 
+## 4. Data Code Input Styles
+
+`get_data_code` supports multiple input styles:
+
+```python
+from boj_stat_search import Code, get_data_code
+
+# Explicit db + plain series code
+response_a = get_data_code(db="IR01", code="MADR1Z@D")
+
+# BOJ UI-style DB'CODE format
+response_b = get_data_code(code=Code("IR01'MADR1Z@D"))
+
+# Omit db (best-effort cache-based resolution)
+response_c = get_data_code(code="MADR1Z@D")
+```
+
+DB auto-resolution uses local cached catalog files only. It does not download metadata.
+If DB cannot be resolved from cache, provide `db` explicitly (or preload cache via `load_catalog_all` / `load_catalog_db`).
+
 ## Two API Styles
 
 `boj_stat_search` provides two ways to make requests:
@@ -64,7 +84,7 @@ The rest of this guide covers the functional API. For the stateful client, see [
 ## Top-Level API Used Here
 
 ```python
-from boj_stat_search import get_metadata, list_db
+from boj_stat_search import Code, get_data_code, get_metadata, list_db
 ```
 
 ## Next Step
