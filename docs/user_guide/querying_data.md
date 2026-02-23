@@ -5,6 +5,7 @@ Fetch time-series values with typed parameters from the top-level API.
 ## Data by Series Code
 
 Use `get_data_code` when you already know series codes.
+`code` accepts plain string codes or the `Code` helper.
 
 ```python
 from boj_stat_search import Period, get_data_code
@@ -17,6 +18,44 @@ response = get_data_code(
 )
 
 print(response.status, len(response.result_set))
+```
+
+### Accepted `code` Forms
+
+Use plain code strings when you already know `db`:
+
+```python
+from boj_stat_search import get_data_code
+
+response = get_data_code(db="FM01", code="STRDCLUCON,STRACLUCON")
+```
+
+Use BOJ UI-style `DB'CODE` format with `Code`:
+
+```python
+from boj_stat_search import Code, get_data_code
+
+response = get_data_code(code=Code("IR01'MADR1Z@D"))
+response_multi = get_data_code(code=Code("IR01'A", "IR01'B"))
+```
+
+### Auto-Resolve `db` from Local Catalog Cache
+
+If `db` is omitted and `code` does not already embed DB information, `get_data_code` attempts to infer `db` from local cached catalog files.
+
+- Cache-only behavior: no metadata download is triggered by this resolution step.
+- For multiple codes in one call, resolution uses the first code.
+- If DB cannot be resolved (not found, ambiguous, or no cache), pass `db` explicitly.
+
+```python
+from boj_stat_search import get_data_code, resolve_db
+
+# Explicit resolution helper
+db = resolve_db("MADR1Z@D")
+response_a = get_data_code(db=db, code="MADR1Z@D")
+
+# Best-effort implicit resolution
+response_b = get_data_code(code="MADR1Z@D")
 ```
 
 ## Series Discovery with Local Catalog
@@ -246,12 +285,14 @@ get_data_layer(
 from boj_stat_search import (
     BojApiError,
     BojClient,
+    Code,
     Frequency,
     Layer,
     Period,
     get_data_code,
     get_data_layer,
     list_series,
+    resolve_db,
     search_series,
 )
 ```
