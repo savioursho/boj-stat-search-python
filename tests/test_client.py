@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, Mock, patch
 import httpx
 
 from boj_stat_search import BojClient
+from boj_stat_search.core.types import Code
 from boj_stat_search.models import DataResponse, MetadataResponse
 
 
@@ -159,6 +160,20 @@ def test_get_data_code_delegates_all_optional_args():
         )
     mock_fn.assert_called_once_with(
         "FM01", "STRDCLUCON", "202501", "202512", 10, "raise", client=c._client
+    )
+    assert result is expected
+
+
+def test_get_data_code_delegates_code_class_with_embedded_db():
+    expected = _make_data_response()
+    code = Code("FM01'STRDCLUCON")
+    with patch(
+        "boj_stat_search.client.get_data_code", return_value=expected
+    ) as mock_fn:
+        c = BojClient()
+        result = c.get_data_code(code=code)
+    mock_fn.assert_called_once_with(
+        None, code, None, None, None, "raise", client=c._client
     )
     assert result is expected
 

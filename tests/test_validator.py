@@ -1,10 +1,12 @@
 import pytest
 
-from boj_stat_search.core.types import Frequency, Layer, Period
+from boj_stat_search.core.types import Code, Frequency, Layer, Period
 from boj_stat_search.core.validator import (
+    coerce_code,
     coerce_frequency,
     coerce_layer,
     coerce_period,
+    extract_db_from_code,
     validate_data_code_params,
     validate_data_layer_params,
     validate_metadata_params,
@@ -193,8 +195,20 @@ def test_coerce_layer_from_layer_returns_api_code():
     assert coerce_layer(Layer(1, 1, 1)) == "1,1,1"
 
 
+def test_coerce_code_from_code_returns_api_code():
+    assert coerce_code(Code("IR01'A", "IR01'B")) == "A,B"
+
+
 def test_coerce_period_from_period_returns_api_code():
     assert coerce_period(Period.month(2025, 4)) == "202504"
+
+
+def test_extract_db_from_code_returns_embedded_db():
+    assert extract_db_from_code(Code("IR01'A")) == "IR01"
+
+
+def test_extract_db_from_non_code_returns_none():
+    assert extract_db_from_code("A") is None
 
 
 def test_coerce_period_with_frequency_falls_back_to_raw_value():

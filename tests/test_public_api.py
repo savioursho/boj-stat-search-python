@@ -20,6 +20,7 @@ from boj_stat_search.catalog import (
     load_catalog_db as catalog_load_catalog_db,
     search_series as catalog_search_series,
 )
+from boj_stat_search.core import Code as CoreCode
 from boj_stat_search.core import Frequency as CoreFrequency
 from boj_stat_search.core import Layer as CoreLayer
 from boj_stat_search.core import Period as CorePeriod
@@ -54,6 +55,7 @@ def test_top_level_re_exports_functional_api():
 def test_top_level_re_exports_key_types_and_models():
     assert bss.Frequency is CoreFrequency
     assert bss.Layer is CoreLayer
+    assert bss.Code is CoreCode
     assert bss.Period is CorePeriod
     assert bss.MetadataExportReport is CatalogMetadataExportReport
     assert bss.CatalogError is CatalogCatalogError
@@ -83,6 +85,7 @@ def test_top_level_has_expected_public_symbols():
         "search_series",
         "Frequency",
         "Layer",
+        "Code",
         "Period",
         "MetadataExportReport",
         "CatalogError",
