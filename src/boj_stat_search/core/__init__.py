@@ -1,6 +1,7 @@
 from boj_stat_search.core.catalog_parser import (
     REQUIRED_COLUMNS,
     ensure_required_columns,
+    resolve_db_from_tables,
     row_to_entry,
     table_to_entries,
 )
@@ -30,6 +31,7 @@ from boj_stat_search.core.validator import (
 __all__ = [
     "REQUIRED_COLUMNS",
     "ensure_required_columns",
+    "resolve_db_from_tables",
     "row_to_entry",
     "table_to_entries",
     "list_db",
