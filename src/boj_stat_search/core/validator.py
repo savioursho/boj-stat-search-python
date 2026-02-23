@@ -1,7 +1,7 @@
 from typing import Any
 
 from boj_stat_search.core.database import list_db
-from boj_stat_search.core.types import Frequency, Layer, Period
+from boj_stat_search.core.types import Code, Frequency, Layer, Period
 
 
 FORBIDDEN_CHARS = ("<", ">", '"', "”", "!", "|", "\\", ";", "'")
@@ -21,6 +21,18 @@ def coerce_layer(layer: Any) -> Any:
     if isinstance(layer, Layer):
         return layer.to_api_value()
     return layer
+
+
+def coerce_code(code: Any) -> Any:
+    if isinstance(code, Code):
+        return code.to_api_value()
+    return code
+
+
+def extract_db_from_code(code: Any) -> str | None:
+    if isinstance(code, Code):
+        return code.db
+    return None
 
 
 def coerce_period(
@@ -148,8 +160,8 @@ def _validate_date_for_frequency(
 
 
 def validate_data_code_params(
-    db: str,
-    code: str,
+    db: str | None,
+    code: str | None,
     start_date: Period | str | None = None,
     end_date: Period | str | None = None,
     start_position: int | None = None,

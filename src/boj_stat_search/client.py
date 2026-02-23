@@ -3,7 +3,7 @@ import time
 import httpx
 
 from boj_stat_search.api.api_request import get_data_code, get_data_layer, get_metadata
-from boj_stat_search.core.types import ErrorMode, Frequency, Layer, Period
+from boj_stat_search.core.types import Code, ErrorMode, Frequency, Layer, Period
 from boj_stat_search.models import DataResponse, MetadataResponse
 
 
@@ -55,8 +55,8 @@ class BojClient:
 
     def get_data_code(
         self,
-        db: str,
-        code: str,
+        db: str | None = None,
+        code: Code | str | None = None,
         start_date: Period | str | None = None,
         end_date: Period | str | None = None,
         start_position: int | None = None,

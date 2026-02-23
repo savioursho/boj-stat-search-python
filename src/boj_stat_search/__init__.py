@@ -19,7 +19,7 @@ from boj_stat_search.catalog import (
     load_catalog_db,
     search_series,
 )
-from boj_stat_search.core import Frequency, Layer, Period, list_db
+from boj_stat_search.core import Code, Frequency, Layer, Period, list_db
 from boj_stat_search.display import show_layers
 from boj_stat_search.models import (
     BaseResponse,
@@ -46,6 +46,7 @@ __all__ = [
     "search_series",
     "Frequency",
     "Layer",
+    "Code",
     "Period",
     "MetadataExportReport",
     "CatalogError",

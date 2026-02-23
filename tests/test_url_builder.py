@@ -2,7 +2,7 @@ from typing import cast
 
 import pytest
 
-from boj_stat_search.core.types import ErrorMode, Frequency, Layer, Period
+from boj_stat_search.core.types import Code, ErrorMode, Frequency, Layer, Period
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
@@ -107,6 +107,42 @@ def test_build_data_code_api_url_accepts_period_instances():
     assert (
         result
         == "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=CO&code=TK99F1000601GCQ01000,TK99F2000601GCQ01000&startDate=202401&endDate=202504"
+    )
+
+
+def test_build_data_code_api_url_accepts_code_class_with_embedded_db():
+    result = build_data_code_api_url(code=Code("FM01'STRDCLUCON"))
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=STRDCLUCON"
+    )
+
+
+def test_build_data_code_api_url_accepts_code_class_with_multiple_codes():
+    result = build_data_code_api_url(code=Code("FM01'A", "FM01'B"))
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=A,B"
+    )
+
+
+def test_build_data_code_api_url_accepts_explicit_db_with_code_class():
+    result = build_data_code_api_url(db="FM01", code=Code("STRDCLUCON"))
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=STRDCLUCON"
+    )
+
+
+def test_build_data_code_api_url_accepts_matching_db_and_embedded_db():
+    result = build_data_code_api_url(db="FM01", code=Code("FM01'STRDCLUCON"))
+
+    assert (
+        result
+        == "https://www.stat-search.boj.or.jp/api/v1/getDataCode?db=FM01&code=STRDCLUCON"
     )
 
 
@@ -254,6 +290,20 @@ def test_build_data_layer_api_url_raises_on_invalid_date_granularity_for_frequen
 def test_build_data_code_api_url_raises_on_unknown_db():
     with pytest.raises(ValueError, match="list_db\\(\\)"):
         build_data_code_api_url(db="UNKNOWN", code="STRDCLUCON")
+
+
+def test_build_data_code_api_url_raises_on_conflicting_db_inputs():
+    with pytest.raises(ValueError, match="conflicting DB"):
+        build_data_code_api_url(db="FM01", code=Code("IR01'STRDCLUCON"))
+
+
+def test_build_data_code_api_url_raises_on_conflicting_db_inputs_even_when_ignore():
+    with pytest.raises(ValueError, match="conflicting DB"):
+        build_data_code_api_url(
+            db="FM01",
+            code=Code("IR01'STRDCLUCON"),
+            on_validation_error="ignore",
+        )
 
 
 def test_build_data_layer_api_url_raises_on_unknown_db():

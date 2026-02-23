@@ -12,7 +12,7 @@ from boj_stat_search.api import (
     get_metadata,
     get_metadata_raw,
 )
-from boj_stat_search.core.types import Frequency, Layer, Period
+from boj_stat_search.core.types import Code, Frequency, Layer, Period
 from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
@@ -286,6 +286,31 @@ def test_get_data_code_raw_accepts_period_instances():
     assert result == expected_payload
 
 
+def test_get_data_code_raw_accepts_code_class_with_embedded_db():
+    code = Code("FM01'STRDCLUCON", "FM01'STRACLUCON")
+    expected_url = build_data_code_api_url(code=code)
+    expected_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DB": "FM01",
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(code=code, client=client)
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
 def test_get_data_code_uses_client_and_returns_parsed_response():
     db = "FM01"
     code = "STRDCLUCON"
@@ -360,6 +385,56 @@ def test_get_data_code_uses_client_and_returns_parsed_response():
                 },
             },
         ),
+    )
+
+
+def test_get_data_code_accepts_code_class_with_embedded_db():
+    code = Code("FM01'STRDCLUCON")
+    expected_url = build_data_code_api_url(code=code)
+    raw_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T15:58:56.071+09:00",
+        "PARAMETER": {
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": "FM01",
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+        },
+        "NEXTPOSITION": None,
+        "RESULTSET": [],
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = raw_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code(code=code, client=client)
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == DataResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T15:58:56.071+09:00",
+        parameter={
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": "FM01",
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+        },
+        next_position=None,
+        result_set=(),
     )
 
 
