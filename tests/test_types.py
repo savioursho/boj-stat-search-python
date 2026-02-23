@@ -1,6 +1,6 @@
 import pytest
 
-from boj_stat_search.core.types import Frequency, Period
+from boj_stat_search.core.types import Code, Frequency, Period
 
 
 def test_period_year_constructor_returns_expected_value():
@@ -55,3 +55,63 @@ def test_period_rejects_invalid_quarter():
 def test_period_rejects_invalid_month():
     with pytest.raises(ValueError, match="month"):
         Period.month(2025, 13)
+
+
+def test_code_accepts_plain_series_code():
+    code = Code("MADR1Z@D")
+
+    assert code.db is None
+    assert code.codes == ("MADR1Z@D",)
+    assert code.to_api_value() == "MADR1Z@D"
+    assert str(code) == "MADR1Z@D"
+
+
+def test_code_accepts_db_code_format():
+    code = Code("IR01'MADR1Z@D")
+
+    assert code.db == "IR01"
+    assert code.codes == ("MADR1Z@D",)
+    assert code.to_api_value() == "MADR1Z@D"
+
+
+def test_code_accepts_mixed_prefixed_and_plain_values():
+    code = Code("IR01'A", "B")
+
+    assert code.db == "IR01"
+    assert code.codes == ("A", "B")
+    assert code.to_api_value() == "A,B"
+
+
+def test_code_rejects_conflicting_db_prefixes():
+    with pytest.raises(ValueError, match="conflicting DB"):
+        Code("IR01'A", "FM01'B")
+
+
+def test_code_rejects_empty_input():
+    with pytest.raises(ValueError, match="between 1 and 250"):
+        Code()
+
+
+def test_code_rejects_too_many_values():
+    with pytest.raises(ValueError, match="between 1 and 250"):
+        Code(*[f"S{i}" for i in range(251)])
+
+
+def test_code_rejects_non_string_value():
+    with pytest.raises(ValueError, match="must be a string"):
+        Code("A", 1)  # type: ignore[arg-type]
+
+
+def test_code_rejects_empty_string_value():
+    with pytest.raises(ValueError, match="non-empty"):
+        Code("")
+
+
+def test_code_rejects_empty_db_prefix_in_db_code_format():
+    with pytest.raises(ValueError, match="DB prefix"):
+        Code("'ABC")
+
+
+def test_code_rejects_empty_code_in_db_code_format():
+    with pytest.raises(ValueError, match="series code"):
+        Code("IR01'")

@@ -144,6 +144,63 @@ class Period:
         return self._value
 
 
+@dataclass(frozen=True, slots=True, init=False)
+class Code:
+    _codes: tuple[str, ...]
+    _db: str | None
+
+    def __init__(self, *codes: str) -> None:
+        if len(codes) < 1 or len(codes) > 250:
+            raise ValueError("code: must provide between 1 and 250 series codes")
+
+        normalized_codes: list[str] = []
+        embedded_db: str | None = None
+
+        for code in codes:
+            if not isinstance(code, str):
+                raise ValueError("code: each value must be a string")
+            if code == "":
+                raise ValueError("code: each value must be non-empty")
+
+            db_part: str | None = None
+            code_part = code
+            if "'" in code:
+                db_part, code_part = code.split("'", 1)
+                if db_part == "":
+                    raise ValueError(
+                        "code: DB prefix must be non-empty in DB'CODE form"
+                    )
+                if code_part == "":
+                    raise ValueError(
+                        "code: series code must be non-empty in DB'CODE form"
+                    )
+
+            if db_part is not None:
+                if embedded_db is None:
+                    embedded_db = db_part
+                elif embedded_db != db_part:
+                    raise ValueError("code: conflicting DB prefixes in DB'CODE values")
+
+            normalized_codes.append(code_part)
+
+        object.__setattr__(self, "_codes", tuple(normalized_codes))
+        object.__setattr__(self, "_db", embedded_db)
+
+    @property
+    def codes(self) -> tuple[str, ...]:
+        return self._codes
+
+    @property
+    def db(self) -> str | None:
+        return self._db
+
+    def to_api_value(self) -> str:
+        return ",".join(self._codes)
+
+    def __str__(self) -> str:
+        return self.to_api_value()
+
+
 def _validate_year(year: int) -> None:
     if isinstance(year, bool) or not isinstance(year, int):
         raise ValueError("period: year must be an integer in range 1000..9999")

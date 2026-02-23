@@ -12,7 +12,7 @@ from boj_stat_search.api import (
     get_metadata,
     get_metadata_raw,
 )
-from boj_stat_search.core.types import Frequency, Layer, Period
+from boj_stat_search.core.types import Code, Frequency, Layer, Period
 from boj_stat_search.models import DataResponse, MetadataEntry, MetadataResponse
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
@@ -286,6 +286,158 @@ def test_get_data_code_raw_accepts_period_instances():
     assert result == expected_payload
 
 
+def test_get_data_code_raw_accepts_code_class_with_embedded_db():
+    code = Code("FM01'STRDCLUCON", "FM01'STRACLUCON")
+    expected_url = build_data_code_api_url(code=code)
+    expected_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DB": "FM01",
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(code=code, client=client)
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
+def test_get_data_code_raw_auto_resolves_db_when_not_provided(monkeypatch) -> None:
+    code = "STRDCLUCON"
+    resolver = Mock(return_value="FM01")
+    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+
+    expected_url = build_data_code_api_url(db="FM01", code=code)
+    expected_payload = {"STATUS": 200, "MESSAGEID": "M181000I", "MESSAGE": "ok"}
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(code=code, client=client)
+
+    resolver.assert_called_once_with("STRDCLUCON")
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
+def test_get_data_code_raw_auto_resolve_uses_first_code_only(monkeypatch) -> None:
+    code = "FIRST_CODE,SECOND_CODE"
+    resolver = Mock(return_value="FM01")
+    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+
+    expected_url = build_data_code_api_url(db="FM01", code=code)
+    expected_payload = {"STATUS": 200, "MESSAGEID": "M181000I", "MESSAGE": "ok"}
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(code=code, client=client)
+
+    resolver.assert_called_once_with("FIRST_CODE")
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
+def test_get_data_code_raw_does_not_auto_resolve_when_db_is_provided(
+    monkeypatch,
+) -> None:
+    resolver = Mock(return_value="FM01")
+    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+
+    expected_url = build_data_code_api_url(db="CO", code="CODE1")
+    expected_payload = {"STATUS": 200, "MESSAGEID": "M181000I", "MESSAGE": "ok"}
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(db="CO", code="CODE1", client=client)
+
+    resolver.assert_not_called()
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
+def test_get_data_code_raw_does_not_auto_resolve_when_code_embeds_db(
+    monkeypatch,
+) -> None:
+    resolver = Mock(return_value="FM01")
+    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+
+    code = Code("FM01'CODE1")
+    expected_url = build_data_code_api_url(code=code)
+    expected_payload = {"STATUS": 200, "MESSAGEID": "M181000I", "MESSAGE": "ok"}
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(code=code, client=client)
+
+    resolver.assert_not_called()
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
+def test_get_data_code_raw_ignores_auto_resolve_errors_and_falls_back(
+    monkeypatch,
+) -> None:
+    resolver = Mock(side_effect=ValueError("not found"))
+    monkeypatch.setattr("boj_stat_search.catalog.search.resolve_db", resolver)
+
+    expected_url = build_data_code_api_url(
+        db=None,
+        code="CODE1",
+        on_validation_error="ignore",
+    )
+    expected_payload = {"STATUS": 200, "MESSAGEID": "M181000I", "MESSAGE": "ok"}
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = expected_payload
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code_raw(
+        code="CODE1",
+        on_validation_error="ignore",
+        client=client,
+    )
+
+    resolver.assert_called_once_with("CODE1")
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == expected_payload
+
+
 def test_get_data_code_uses_client_and_returns_parsed_response():
     db = "FM01"
     code = "STRDCLUCON"
@@ -360,6 +512,56 @@ def test_get_data_code_uses_client_and_returns_parsed_response():
                 },
             },
         ),
+    )
+
+
+def test_get_data_code_accepts_code_class_with_embedded_db():
+    code = Code("FM01'STRDCLUCON")
+    expected_url = build_data_code_api_url(code=code)
+    raw_payload = {
+        "STATUS": 200,
+        "MESSAGEID": "M181000I",
+        "MESSAGE": "ok",
+        "DATE": "2026-02-21T15:58:56.071+09:00",
+        "PARAMETER": {
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": "FM01",
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+        },
+        "NEXTPOSITION": None,
+        "RESULTSET": [],
+    }
+
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = raw_payload
+
+    client = Mock()
+    client.get.return_value = response
+
+    result = get_data_code(code=code, client=client)
+
+    client.get.assert_called_once_with(expected_url)
+    response.raise_for_status.assert_called_once_with()
+    response.json.assert_called_once_with()
+    assert result == DataResponse(
+        status=200,
+        message_id="M181000I",
+        message="ok",
+        date="2026-02-21T15:58:56.071+09:00",
+        parameter={
+            "FORMAT": "",
+            "LANG": "EN",
+            "DB": "FM01",
+            "STARTDATE": "",
+            "ENDDATE": "",
+            "STARTPOSITION": "",
+        },
+        next_position=None,
+        result_set=(),
     )
 
 

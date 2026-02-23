@@ -4,16 +4,18 @@ from boj_stat_search.core.parser import (
     parse_data_code_response,
     parse_metadata_response,
 )
-from boj_stat_search.core.types import ErrorMode, Frequency, Layer, Period
+from boj_stat_search.core.types import Code, ErrorMode, Frequency, Layer, Period
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
     build_metadata_api_url,
 )
 from boj_stat_search.core.validator import (
+    coerce_code,
     coerce_frequency,
     coerce_layer,
     coerce_period,
+    extract_db_from_code,
     validate_data_code_params,
     validate_data_layer_params,
     validate_metadata_params,
@@ -26,6 +28,7 @@ __all__ = [
     "parse_metadata_response",
     "Frequency",
     "Layer",
+    "Code",
     "Period",
     "ErrorMode",
     "build_data_code_api_url",
@@ -33,7 +36,9 @@ __all__ = [
     "build_metadata_api_url",
     "coerce_frequency",
     "coerce_layer",
+    "coerce_code",
     "coerce_period",
+    "extract_db_from_code",
     "validate_data_code_params",
     "validate_data_layer_params",
     "validate_metadata_params",
