@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -137,7 +138,15 @@ def resolve_db(
         if not cache_path.exists():
             continue
 
-        table = pq.read_table(cache_path)
+        try:
+            table = pq.read_table(cache_path)
+        except Exception as exc:
+            warnings.warn(
+                f"resolve_db: skipping unreadable cache file for {db_name} "
+                f"at {cache_path}: {exc}",
+                stacklevel=2,
+            )
+            continue
         if "series_code" not in table.column_names:
             continue
 
