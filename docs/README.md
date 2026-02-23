@@ -3,8 +3,8 @@
 ## Sections
 
 - **[API Manual](./api_manual/)** — Documents the raw Bank of Japan Stat-Search Web API: endpoints, parameters, response shapes, and discrepancies between the official manual and observed behavior.
-- **[User Guide](./user_guide/)** — Explains how to use the `boj_stat_search` Python package: getting started, querying data, pagination, error handling, and layer tree display. Includes wrapper conveniences such as `Code` (`DB'CODE` input) and cache-based DB resolution for `get_data_code`.
-- **[Development Guide](./development_guide/)** — Covers branch policy, release process, versioning strategy, and metadata licensing determination for contributors.
+- **[User Guide](./user_guide/)** — Explains how to use the `boj_stat_search` Python package: two-layer API architecture, getting started, querying data, pagination, error handling, and layer tree display. Includes wrapper conveniences such as `Code` (`DB'CODE` input) and cache-based DB resolution for `get_data_code`.
+- **[Development Guide](./development_guide/)** — Covers two-layer API architecture, branch policy, release process, versioning strategy, and metadata licensing determination for contributors.
 
 ## Data Code Usability
 
