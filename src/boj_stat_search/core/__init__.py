@@ -1,3 +1,9 @@
+from boj_stat_search.core.catalog_parser import (
+    REQUIRED_COLUMNS,
+    ensure_required_columns,
+    row_to_entry,
+    table_to_entries,
+)
 from boj_stat_search.core.database import list_db
 from boj_stat_search.core.formatter import format_layer_tree
 from boj_stat_search.core.parser import (
@@ -22,6 +28,10 @@ from boj_stat_search.core.validator import (
 )
 
 __all__ = [
+    "REQUIRED_COLUMNS",
+    "ensure_required_columns",
+    "row_to_entry",
+    "table_to_entries",
     "list_db",
     "format_layer_tree",
     "parse_data_code_response",
