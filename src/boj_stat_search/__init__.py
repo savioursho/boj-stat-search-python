@@ -24,7 +24,7 @@ from boj_stat_search.shell.catalog.search import (
     resolve_db,
     search_series,
 )
-from boj_stat_search.core import Code, Frequency, Layer, Period, list_db
+from boj_stat_search.core import Code, Db, Frequency, Layer, Period, list_db
 from boj_stat_search.shell.display import show_layers
 from boj_stat_search.core.models import (
     BaseResponse,
@@ -50,6 +50,7 @@ __all__ = [
     "list_series",
     "search_series",
     "resolve_db",
+    "Db",
     "Frequency",
     "Layer",
     "Code",
