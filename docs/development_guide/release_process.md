@@ -58,17 +58,28 @@ uv run pytest -q
 
 All checks must pass before proceeding.
 
-### 4. Merge the release branch into develop
+### 4. Push the release branch and open a PR targeting develop
 
-- Push the release branch and open a PR targeting `develop`.
-- Merge the PR after review.
+```bash
+git push -u origin release/vX.Y.Z
+gh pr create --base develop --title "release/vX.Y.Z"
+```
 
-### 5. Merge develop into main
+### 5. Merge the PR after review
 
-- Open a PR from `develop` to `main`.
-- Merge the PR after review.
+Merge the release PR into `develop`.
 
-### 6. Tag and release
+### 6. Open a PR from develop to main
+
+```bash
+gh pr create --base main --head develop --title "vX.Y.Z"
+```
+
+### 7. Merge the PR after review
+
+Merge `develop` into `main`.
+
+### 8. Tag and release
 
 ```bash
 git fetch origin main
