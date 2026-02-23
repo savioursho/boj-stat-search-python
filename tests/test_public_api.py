@@ -18,6 +18,7 @@ from boj_stat_search.catalog import (
     list_series as catalog_list_series,
     load_catalog_all as catalog_load_catalog_all,
     load_catalog_db as catalog_load_catalog_db,
+    resolve_db as catalog_resolve_db,
     search_series as catalog_search_series,
 )
 from boj_stat_search.core import Code as CoreCode
@@ -49,6 +50,7 @@ def test_top_level_re_exports_functional_api():
     assert bss.load_catalog_all is catalog_load_catalog_all
     assert bss.list_series is catalog_list_series
     assert bss.search_series is catalog_search_series
+    assert bss.resolve_db is catalog_resolve_db
     assert bss.show_layers is display_show_layers
 
 
@@ -83,6 +85,7 @@ def test_top_level_has_expected_public_symbols():
         "load_catalog_all",
         "list_series",
         "search_series",
+        "resolve_db",
         "Frequency",
         "Layer",
         "Code",

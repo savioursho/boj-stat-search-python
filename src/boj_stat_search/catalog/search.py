@@ -6,12 +6,14 @@ from typing import Any
 
 import httpx
 import pyarrow as pa
+import pyarrow.parquet as pq
 
 from boj_stat_search.catalog.loader import (
     DEFAULT_CACHE_TTL_SECONDS,
     DEFAULT_CATALOG_REF,
     DEFAULT_CATALOG_REPO,
     DEFAULT_METADATA_DIR,
+    _cache_file_path,
     CatalogError,
     load_catalog_all,
     load_catalog_db,
@@ -130,6 +132,51 @@ def list_series(
         client=client,
     )
     return _table_to_entries(table)
+
+
+def resolve_db(
+    series_code: str,
+    *,
+    cache_dir: str | Path | None = None,
+) -> str:
+    """Resolve DB for a series code using local cached catalog parquet files only."""
+    if not isinstance(series_code, str):
+        raise ValueError("series_code: must be a non-empty string")
+    normalized_series_code = series_code.strip()
+    if normalized_series_code == "":
+        raise ValueError("series_code: must be a non-empty string")
+
+    matched_dbs: list[str] = []
+    for db_info in list_db():
+        db_name = db_info.name
+        cache_path = _cache_file_path(db_name, cache_dir=cache_dir)
+        if not cache_path.exists():
+            continue
+
+        table = pq.read_table(cache_path)
+        if "series_code" not in table.column_names:
+            continue
+
+        match_mask = pa.array(
+            [
+                value == normalized_series_code
+                for value in table["series_code"].to_pylist()
+            ]
+        )
+        matched = table.filter(match_mask)
+        if matched.num_rows > 0:
+            matched_dbs.append(db_name)
+
+    if len(matched_dbs) == 1:
+        return matched_dbs[0]
+    if len(matched_dbs) == 0:
+        raise ValueError(
+            "resolve_db: series code not found in any cached catalog; "
+            "specify db explicitly or run load_catalog_all() to populate cache"
+        )
+    raise ValueError(
+        "resolve_db: series code found in multiple DBs; specify db explicitly"
+    )
 
 
 def _normalize_keyword(keyword: str) -> str:

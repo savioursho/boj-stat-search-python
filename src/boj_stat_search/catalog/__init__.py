@@ -12,7 +12,7 @@ from boj_stat_search.catalog.loader import (
     load_catalog_all,
     load_catalog_db,
 )
-from boj_stat_search.catalog.search import list_series, search_series
+from boj_stat_search.catalog.search import list_series, resolve_db, search_series
 
 __all__ = [
     "METADATA_PARQUET_COLUMNS",
@@ -27,4 +27,5 @@ __all__ = [
     "load_catalog_all",
     "list_series",
     "search_series",
+    "resolve_db",
 ]

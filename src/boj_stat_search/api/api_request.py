@@ -12,6 +12,7 @@ from boj_stat_search.core.url_builder import (
     build_data_layer_api_url,
     build_metadata_api_url,
 )
+from boj_stat_search.core.validator import coerce_code, extract_db_from_code
 
 
 class BojApiError(httpx.HTTPStatusError):
@@ -135,6 +136,21 @@ def get_data_code_raw(
     *,
     client: httpx.Client | None = None,
 ) -> dict[str, Any]:
+    if db is None and extract_db_from_code(code) is None:
+        normalized_code = coerce_code(code)
+        first_code = (
+            normalized_code.split(",", 1)[0].strip()
+            if isinstance(normalized_code, str)
+            else None
+        )
+        if first_code:
+            try:
+                from boj_stat_search.catalog.search import resolve_db
+
+                db = resolve_db(first_code)
+            except Exception:
+                pass
+
     url = build_data_code_api_url(
         db=db,
         code=code,
