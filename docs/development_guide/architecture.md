@@ -1,5 +1,7 @@
 # Functional Core / Imperative Shell Architecture
 
+Part of the [Development Guide](./README.md).
+
 This project follows the Functional Core / Imperative Shell pattern at the
 directory level.
 

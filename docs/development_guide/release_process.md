@@ -1,5 +1,7 @@
 # Release Process and Branch Policy
 
+Part of the [Development Guide](./README.md).
+
 ## Branch Structure
 
 | Branch | Purpose |
