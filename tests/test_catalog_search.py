@@ -10,6 +10,7 @@ import pyarrow.parquet as pq
 import pytest
 
 from boj_stat_search.shell.catalog import (
+    CatalogCacheError,
     CatalogError,
     list_series,
     resolve_db,
@@ -519,6 +520,44 @@ def test_resolve_db_raises_when_code_found_in_multiple_dbs(
 
     with pytest.raises(ValueError, match="found in multiple DBs"):
         resolve_db("DUP", cache_dir=tmp_path)
+
+
+def test_resolve_db_raises_cache_error_when_no_cache_files(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+
+    with pytest.raises(CatalogCacheError, match="no cached catalog files found"):
+        resolve_db("ANY", cache_dir=tmp_path)
+
+
+def test_resolve_db_raises_cache_error_when_cache_dir_missing(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+    nonexistent = tmp_path / "does_not_exist"
+
+    with pytest.raises(CatalogCacheError, match="no cached catalog files found"):
+        resolve_db("ANY", cache_dir=nonexistent)
+
+
+def test_resolve_db_raises_cache_error_when_all_caches_lack_series_code(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+    pq.write_table(pa.table({"db": ["FM01"]}), tmp_path / "FM01.parquet")
+
+    with pytest.raises(CatalogCacheError, match="no cached catalog files found"):
+        resolve_db("ANY", cache_dir=tmp_path)
 
 
 def test_resolve_db_rejects_non_string_series_code() -> None:

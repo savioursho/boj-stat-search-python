@@ -101,15 +101,18 @@ def test_row_to_entry_raises_on_non_string_field() -> None:
     with pytest.raises(ValueError, match="name_j"):
         row_to_entry(row)
 
+
 def test_row_to_entry_raises_on_non_int_layer() -> None:
     row = _make_row(layer1="one")
     with pytest.raises(ValueError, match="layer1"):
         row_to_entry(row)
 
+
 def test_row_to_entry_raises_on_bool_layer() -> None:
     row = _make_row(layer1=True)
     with pytest.raises(ValueError, match="layer1"):
         row_to_entry(row)
+
 
 # ---------------------------------------------------------------------------
 # table_to_entries
