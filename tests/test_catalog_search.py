@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import httpx
 import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 
-from boj_stat_search.catalog import CatalogError, list_series, search_series
+from boj_stat_search.catalog import CatalogError, list_series, resolve_db, search_series
 from boj_stat_search.core import Layer
 from boj_stat_search.models import SeriesCatalogEntry
 
@@ -425,3 +427,112 @@ def test_list_series_raises_catalog_error_when_columns_missing(monkeypatch) -> N
 
     with pytest.raises(CatalogError, match="missing required columns"):
         list_series("FM01")
+
+
+def _write_cache_table(
+    cache_dir: Path,
+    db: str,
+    rows: list[dict[str, str]],
+) -> None:
+    pq.write_table(pa.Table.from_pylist(rows), cache_dir / f"{db}.parquet")
+
+
+def test_resolve_db_returns_unique_match_from_cache(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
+    )
+    _write_cache_table(
+        tmp_path,
+        "FM01",
+        [{"series_code": "MADR1Z@D"}, {"series_code": "STRDCLUCON"}],
+    )
+    _write_cache_table(
+        tmp_path,
+        "BP01",
+        [{"series_code": "OTHER"}],
+    )
+
+    assert resolve_db("STRDCLUCON", cache_dir=tmp_path) == "FM01"
+
+
+def test_resolve_db_skips_missing_cache_files(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
+    )
+    _write_cache_table(
+        tmp_path,
+        "BP01",
+        [{"series_code": "CODE1"}],
+    )
+
+    assert resolve_db("CODE1", cache_dir=tmp_path) == "BP01"
+
+
+def test_resolve_db_raises_when_code_not_found(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+    _write_cache_table(
+        tmp_path,
+        "FM01",
+        [{"series_code": "A"}],
+    )
+
+    with pytest.raises(ValueError, match="not found in any cached catalog"):
+        resolve_db("B", cache_dir=tmp_path)
+
+
+def test_resolve_db_raises_when_code_found_in_multiple_dbs(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
+    )
+    _write_cache_table(
+        tmp_path,
+        "FM01",
+        [{"series_code": "DUP"}],
+    )
+    _write_cache_table(
+        tmp_path,
+        "BP01",
+        [{"series_code": "DUP"}],
+    )
+
+    with pytest.raises(ValueError, match="found in multiple DBs"):
+        resolve_db("DUP", cache_dir=tmp_path)
+
+
+def test_resolve_db_rejects_non_string_series_code() -> None:
+    with pytest.raises(ValueError, match="non-empty string"):
+        resolve_db(123)  # type: ignore[arg-type]
+
+
+def test_resolve_db_rejects_empty_series_code() -> None:
+    with pytest.raises(ValueError, match="non-empty string"):
+        resolve_db("   ")
+
+
+def test_resolve_db_skips_cache_without_series_code_column(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
+    )
+    pq.write_table(pa.table({"db": ["FM01"]}), tmp_path / "FM01.parquet")
+    _write_cache_table(
+        tmp_path,
+        "BP01",
+        [{"series_code": "TARGET"}],
+    )
+
+    assert resolve_db("TARGET", cache_dir=tmp_path) == "BP01"

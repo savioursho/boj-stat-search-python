@@ -17,6 +17,7 @@ from boj_stat_search.catalog import (
     list_series,
     load_catalog_all,
     load_catalog_db,
+    resolve_db,
     search_series,
 )
 from boj_stat_search.core import Code, Frequency, Layer, Period, list_db
@@ -44,6 +45,7 @@ __all__ = [
     "load_catalog_all",
     "list_series",
     "search_series",
+    "resolve_db",
     "Frequency",
     "Layer",
     "Code",
