@@ -4,7 +4,12 @@ from typing import Annotated, Optional
 
 import typer
 
-from boj_stat_search.shell.api import BojApiError, get_data_code, get_data_layer, get_metadata
+from boj_stat_search.shell.api import (
+    BojApiError,
+    get_data_code,
+    get_data_layer,
+    get_metadata,
+)
 from boj_stat_search.shell.catalog.exporter import generate_metadata_parquet_files
 from boj_stat_search.core import list_db
 from boj_stat_search.shell.display import show_layers

@@ -55,7 +55,9 @@ def test_context_manager_closes_internal_client_on_exit():
 
 def test_context_manager_delegates_get_metadata():
     expected = _make_metadata_response()
-    with patch("boj_stat_search.shell.client.get_metadata", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.shell.client.get_metadata", return_value=expected
+    ) as mock_fn:
         with BojClient() as c:
             result = c.get_metadata("IR01")
     mock_fn.assert_called_once_with("IR01", "raise", client=c._client)
@@ -106,7 +108,9 @@ def test_explicit_close_does_not_close_external_client():
 def test_external_client_is_used_for_requests():
     external = Mock(spec=httpx.Client)
     expected = _make_metadata_response()
-    with patch("boj_stat_search.shell.client.get_metadata", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.shell.client.get_metadata", return_value=expected
+    ) as mock_fn:
         c = BojClient(client=external)
         result = c.get_metadata("IR01")
     mock_fn.assert_called_once_with("IR01", "raise", client=external)
@@ -120,7 +124,9 @@ def test_external_client_is_used_for_requests():
 
 def test_get_metadata_delegates_to_functional_api():
     expected = _make_metadata_response()
-    with patch("boj_stat_search.shell.client.get_metadata", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.shell.client.get_metadata", return_value=expected
+    ) as mock_fn:
         c = BojClient()
         result = c.get_metadata("IR01")
     mock_fn.assert_called_once_with("IR01", "raise", client=c._client)
@@ -307,7 +313,9 @@ def test_on_validation_error_default_is_raise():
 
 def test_on_validation_error_forwarded_to_get_metadata():
     expected = _make_metadata_response()
-    with patch("boj_stat_search.shell.client.get_metadata", return_value=expected) as mock_fn:
+    with patch(
+        "boj_stat_search.shell.client.get_metadata", return_value=expected
+    ) as mock_fn:
         c = BojClient(on_validation_error="warn")
         c.get_metadata("IR01")
     mock_fn.assert_called_once_with("IR01", "warn", client=c._client)

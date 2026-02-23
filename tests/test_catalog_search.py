@@ -9,7 +9,12 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from boj_stat_search.shell.catalog import CatalogError, list_series, resolve_db, search_series
+from boj_stat_search.shell.catalog import (
+    CatalogError,
+    list_series,
+    resolve_db,
+    search_series,
+)
 from boj_stat_search.core import Layer
 from boj_stat_search.core.models import SeriesCatalogEntry
 
@@ -153,7 +158,9 @@ def test_search_series_with_db_uses_load_catalog_db(monkeypatch) -> None:
     )
     load_all = Mock()
     monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
-    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_all", load_all)
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.load_catalog_all", load_all
+    )
 
     results = search_series("call", db="FM01")
 
@@ -182,7 +189,9 @@ def test_search_series_with_dbs_uses_load_catalog_all(monkeypatch) -> None:
         )
     )
     load_db = Mock()
-    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_all", load_all)
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.load_catalog_all", load_all
+    )
     monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     results = search_series("rate", dbs=["FM01", "BP01", "FM01"])
@@ -201,7 +210,9 @@ def test_search_series_rejects_db_and_dbs_together() -> None:
 def test_search_series_returns_empty_for_empty_dbs(monkeypatch) -> None:
     load_all = Mock()
     load_db = Mock()
-    monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_all", load_all)
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.load_catalog_all", load_all
+    )
     monkeypatch.setattr("boj_stat_search.shell.catalog.search.load_catalog_db", load_db)
 
     results = search_series("rate", dbs=[])
