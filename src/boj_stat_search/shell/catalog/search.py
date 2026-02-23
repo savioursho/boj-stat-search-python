@@ -13,6 +13,7 @@ from boj_stat_search.shell.catalog.loader import (
     DEFAULT_CATALOG_REPO,
     DEFAULT_METADATA_DIR,
     _cache_file_path,
+    CatalogCacheError,
     CatalogError,
     load_catalog_all,
     load_catalog_db,
@@ -20,6 +21,7 @@ from boj_stat_search.shell.catalog.loader import (
 from boj_stat_search.core import (
     Layer,
     list_db,
+    resolve_db_from_tables as _core_resolve_db_from_tables,
     table_to_entries as _core_table_to_entries,
 )
 from boj_stat_search.core.validator import coerce_layer
@@ -128,7 +130,7 @@ def resolve_db(
     if normalized_series_code == "":
         raise ValueError("series_code: must be a non-empty string")
 
-    matched_dbs: list[str] = []
+    tables: list[tuple[str, pa.Table]] = []
     for db_info in list_db():
         db_name = db_info.name
         cache_path = _cache_file_path(db_name, cache_dir=cache_dir)
@@ -139,26 +141,15 @@ def resolve_db(
         if "series_code" not in table.column_names:
             continue
 
-        match_mask = pa.array(
-            [
-                value == normalized_series_code
-                for value in table["series_code"].to_pylist()
-            ]
-        )
-        matched = table.filter(match_mask)
-        if matched.num_rows > 0:
-            matched_dbs.append(db_name)
+        tables.append((db_name, table))
 
-    if len(matched_dbs) == 1:
-        return matched_dbs[0]
-    if len(matched_dbs) == 0:
-        raise ValueError(
-            "resolve_db: series code not found in any cached catalog; "
-            "specify db explicitly or run load_catalog_all() to populate cache"
+    if not tables:
+        raise CatalogCacheError(
+            "resolve_db: no cached catalog files found; "
+            "run load_catalog_all() to populate cache"
         )
-    raise ValueError(
-        "resolve_db: series code found in multiple DBs; specify db explicitly"
-    )
+
+    return _core_resolve_db_from_tables(normalized_series_code, tables)
 
 
 def _normalize_keyword(keyword: str) -> str:

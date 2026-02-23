@@ -4,10 +4,11 @@ import pyarrow as pa
 import pytest
 
 from boj_stat_search.core.catalog_parser import (
+    REQUIRED_COLUMNS,
     ensure_required_columns,
+    resolve_db_from_tables,
     row_to_entry,
     table_to_entries,
-    REQUIRED_COLUMNS,
 )
 from boj_stat_search.core.models import SeriesCatalogEntry
 
@@ -101,15 +102,18 @@ def test_row_to_entry_raises_on_non_string_field() -> None:
     with pytest.raises(ValueError, match="name_j"):
         row_to_entry(row)
 
+
 def test_row_to_entry_raises_on_non_int_layer() -> None:
     row = _make_row(layer1="one")
     with pytest.raises(ValueError, match="layer1"):
         row_to_entry(row)
 
+
 def test_row_to_entry_raises_on_bool_layer() -> None:
     row = _make_row(layer1=True)
     with pytest.raises(ValueError, match="layer1"):
         row_to_entry(row)
+
 
 # ---------------------------------------------------------------------------
 # table_to_entries
@@ -142,3 +146,45 @@ def test_table_to_entries_raises_on_invalid_row_data() -> None:
     table = _make_table(rows)
     with pytest.raises(ValueError, match="layer1"):
         table_to_entries(table)
+
+
+# ---------------------------------------------------------------------------
+# resolve_db_from_tables
+# ---------------------------------------------------------------------------
+
+
+def _make_code_table(codes: list[str]) -> pa.Table:
+    return pa.table({"series_code": codes})
+
+
+def test_resolve_db_from_tables_returns_unique_match_single_table() -> None:
+    tables = [("FM01", _make_code_table(["CODE_A", "CODE_B"]))]
+    assert resolve_db_from_tables("CODE_A", tables) == "FM01"
+
+
+def test_resolve_db_from_tables_returns_unique_match_multiple_tables() -> None:
+    tables = [
+        ("FM01", _make_code_table(["CODE_A"])),
+        ("BP01", _make_code_table(["CODE_B"])),
+    ]
+    assert resolve_db_from_tables("CODE_B", tables) == "BP01"
+
+
+def test_resolve_db_from_tables_raises_when_code_not_found() -> None:
+    tables = [("FM01", _make_code_table(["CODE_A"]))]
+    with pytest.raises(ValueError, match="not found in any"):
+        resolve_db_from_tables("MISSING", tables)
+
+
+def test_resolve_db_from_tables_raises_when_code_in_multiple_dbs() -> None:
+    tables = [
+        ("FM01", _make_code_table(["DUP"])),
+        ("BP01", _make_code_table(["DUP"])),
+    ]
+    with pytest.raises(ValueError, match="found in multiple"):
+        resolve_db_from_tables("DUP", tables)
+
+
+def test_resolve_db_from_tables_empty_tables_raises() -> None:
+    with pytest.raises(ValueError, match="not found in any"):
+        resolve_db_from_tables("CODE_A", [])

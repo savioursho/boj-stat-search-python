@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 import pyarrow as pa
@@ -82,3 +83,28 @@ def _required_int(row: dict[str, Any], field: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{field}: must be an integer")
     return value
+
+
+def resolve_db_from_tables(
+    series_code: str,
+    tables: Sequence[tuple[str, pa.Table]],
+) -> str:
+    matched_dbs: list[str] = []
+    for db_name, table in tables:
+        match_mask = pa.array(
+            [value == series_code for value in table["series_code"].to_pylist()]
+        )
+        matched = table.filter(match_mask)
+        if matched.num_rows > 0:
+            matched_dbs.append(db_name)
+
+    if len(matched_dbs) == 1:
+        return matched_dbs[0]
+    if len(matched_dbs) == 0:
+        raise ValueError(
+            "resolve_db_from_tables: series code not found in any cached catalog; "
+            "specify db explicitly or run load_catalog_all() to populate cache"
+        )
+    raise ValueError(
+        "resolve_db_from_tables: series code found in multiple DBs; specify db explicitly"
+    )
