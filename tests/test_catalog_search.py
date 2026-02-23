@@ -586,3 +586,43 @@ def test_resolve_db_skips_cache_without_series_code_column(
     )
 
     assert resolve_db("TARGET", cache_dir=tmp_path) == "BP01"
+
+
+def test_resolve_db_skips_corrupted_cache_and_finds_match_in_later_db(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"), SimpleNamespace(name="BP01")),
+    )
+    (tmp_path / "FM01.parquet").write_bytes(b"not a parquet file")
+    _write_cache_table(
+        tmp_path,
+        "BP01",
+        [{"series_code": "TARGET"}],
+    )
+
+    with pytest.warns(
+        UserWarning, match="resolve_db: skipping unreadable cache file for FM01"
+    ):
+        result = resolve_db("TARGET", cache_dir=tmp_path)
+
+    assert result == "BP01"
+
+
+def test_resolve_db_warns_on_corrupted_cache_file(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "boj_stat_search.shell.catalog.search.list_db",
+        lambda: (SimpleNamespace(name="FM01"),),
+    )
+    (tmp_path / "FM01.parquet").write_bytes(b"garbage")
+
+    with pytest.warns(
+        UserWarning, match="resolve_db: skipping unreadable cache file for FM01"
+    ):
+        with pytest.raises(CatalogCacheError, match="no cached catalog files found"):
+            resolve_db("ANY", cache_dir=tmp_path)
