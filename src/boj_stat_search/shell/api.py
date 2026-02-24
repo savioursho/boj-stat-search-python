@@ -6,13 +6,14 @@ from boj_stat_search.core.parser import (
     parse_data_code_response,
     parse_metadata_response,
 )
+from boj_stat_search.core.error_parser import parse_error_payload
+from boj_stat_search.core.request_planner import pick_first_code_for_db_resolution
 from boj_stat_search.core.types import Code, Db, ErrorMode, Frequency, Layer, Period
 from boj_stat_search.core.url_builder import (
     build_data_code_api_url,
     build_data_layer_api_url,
     build_metadata_api_url,
 )
-from boj_stat_search.core.validator import coerce_code, extract_db_from_code
 
 
 class BojApiError(httpx.HTTPStatusError):
@@ -43,22 +44,8 @@ def _extract_error_fields(
     if not isinstance(payload, dict):
         return None, None, None
 
-    raw_status = payload.get("STATUS")
-    if raw_status in (None, ""):
-        boj_status = None
-    else:
-        try:
-            boj_status = int(raw_status)
-        except (TypeError, ValueError):
-            boj_status = None
-
-    raw_message_id = payload.get("MESSAGEID")
-    message_id = str(raw_message_id) if raw_message_id not in (None, "") else None
-
-    raw_message = payload.get("MESSAGE")
-    boj_message = str(raw_message) if raw_message not in (None, "") else None
-
-    return boj_status, message_id, boj_message
+    fields = parse_error_payload(payload)
+    return fields.boj_status, fields.message_id, fields.boj_message
 
 
 def _raise_for_status_with_boj_message(response: httpx.Response) -> None:
@@ -136,20 +123,14 @@ def get_data_code_raw(
     *,
     client: httpx.Client | None = None,
 ) -> dict[str, Any]:
-    if db is None and extract_db_from_code(code) is None:
-        normalized_code = coerce_code(code)
-        first_code = (
-            normalized_code.split(",", 1)[0].strip()
-            if isinstance(normalized_code, str)
-            else None
-        )
-        if first_code:
-            try:
-                from boj_stat_search.shell.catalog.search import resolve_db
+    first_code = pick_first_code_for_db_resolution(db, code)
+    if first_code is not None:
+        try:
+            from boj_stat_search.shell.catalog.search import resolve_db
 
-                db = resolve_db(first_code)
-            except Exception:
-                pass
+            db = resolve_db(first_code)
+        except Exception:
+            pass
 
     url = build_data_code_api_url(
         db=db,
