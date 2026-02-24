@@ -80,12 +80,6 @@ thin.
 |---|---|
 | `tests/shell/test_public_api.py` | top-level re-export contract in `src/boj_stat_search/__init__.py` |
 
-## Migration Note
-
-This guide defines the target test layout first. Actual file moves from the
-current flat `tests/` layout into `tests/core/` and `tests/shell/` can be done
-in a later change without altering the strategy in this document.
-
 ## Core Testing Strategy (Comprehensive / Heavy)
 
 For `core` targets:

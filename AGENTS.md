@@ -7,7 +7,7 @@
 - `api/`: side-effect functions that call HTTP endpoints (`api_request.py`).
 - `cli/`: Typer-based CLI commands (`app.py`). Delegates to public API functions — no business logic.
 - `models/`: dataclasses and typed response objects.
-- Tests: `tests/` (`test_api_request.py`, `test_parser.py`, `test_url_builder.py`, `test_validator.py`).
+- Tests: `tests/core/` (pure logic tests) and `tests/shell/` (I/O & integration tests).
 - Reference docs and experiments: `notes/` and `docs/` (not production code).
 
 ## Development Guide Docs
@@ -23,7 +23,7 @@
 
 - Install/sync environment: `uv sync`
 - Run tests: `uv run pytest -q`
-- Run a specific test file: `uv run pytest -q tests/test_validator.py`
+- Run a specific test file: `uv run pytest -q tests/core/test_validator.py`
 - Lint: `uv run ruff check src tests`
 - Format: `uv run ruff format`
 - Type check: `uv run ty check`
