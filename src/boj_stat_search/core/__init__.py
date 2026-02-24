@@ -1,3 +1,5 @@
+from boj_stat_search.core.error_parser import BojErrorFields, parse_error_payload
+from boj_stat_search.core.request_planner import pick_first_code_for_db_resolution
 from boj_stat_search.core.catalog_parser import (
     REQUIRED_COLUMNS,
     ensure_required_columns,
@@ -29,6 +31,9 @@ from boj_stat_search.core.validator import (
 )
 
 __all__ = [
+    "BojErrorFields",
+    "parse_error_payload",
+    "pick_first_code_for_db_resolution",
     "REQUIRED_COLUMNS",
     "ensure_required_columns",
     "resolve_db_from_tables",
